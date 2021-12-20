@@ -33,7 +33,7 @@
 			let switchF = 0;
 			let prevTime = Date.now();
 			const clock = new THREE.Clock();
-
+			const mixers = [];
 
 			const time = performance.now() * 0.001;
 
@@ -131,18 +131,11 @@
 				const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
 
 				mesh = new THREE.Mesh( geometry, material );
-				//island = new THREE.Mesh(new THREE.CylinderGeometry(30, 40, 10));
-				//island.receiveShadow = true;
+/* 				island = new THREE.Mesh(new THREE.CylinderGeometry(30, 40, 10));
+				island.receiveShadow = true;
+				island.material =  new THREE.MeshStandardMaterial( { color: 0x00ff00,roughness: 0 } );
+				scene.add( island); */
 
-				//ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 70, 4),
-						//					new THREE.MeshStandardMaterial( { color: 0x00ff00,roughness: 0 }));
-						//					ground.rotation.x = Math.PI / 2;
-						//					ground.rotation.y = Math.PI;
-						//					ground.position.y= 0;
-											
-				//island.material =  new THREE.MeshStandardMaterial( { color: 0x00ff00,roughness: 0 } );
-
-				//scene.add( island);
 				light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
   				light.position.set(0, 1, 0);
         		scene.add(light);
@@ -155,8 +148,12 @@
 				const loader2 = new FBXLoader();
 
 
-				loader2.load( 'models/fbx/falirMan.fbx', function ( object ) {
-				object.position.y = 300;
+				loader2.load( 'models/fbx/Run.fbx', function ( object ) {
+				object.rotation.y = Math.PI;
+				object.position.y = 80;
+				object.position.x = 370;
+				object.position.z = -370;
+				object.scale.set (0.5,0.5,0.5);
 				mixer = new THREE.AnimationMixer( object );
 
 				const action = mixer.clipAction( object.animations[ 0 ] );
@@ -177,6 +174,8 @@
 
 				} );
 
+
+
 				/* loader2.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
 				//	object.scale.set(0.2,0.2,0.2);
 					object.traverse ( function ( child ) {
@@ -193,7 +192,7 @@
 				island.scale.x = 5;
 				island.scale.y = 5;
 				island.scale.z = 5;
-				//scene.add( island );
+				scene.add( island );
 
 				}, undefined, function ( error ) {
 
@@ -255,7 +254,7 @@
 				scene.add( skeleton ); */
 
 
-		/* 		loader1.load( "models/gltf/flamingo.glb", function ( gltf ) {
+		 		loader1.load( "models/gltf/flamingo.glb", function ( gltf ) {
 
 				flamingo = gltf.scene.children[ 0 ];
 				flamingo.scale.set( 0.7, 0.7, 0.7 );
@@ -267,11 +266,11 @@
 				flamingo.position.z = -250;
 				scene.add( flamingo );
 
-				mixer = new THREE.AnimationMixer( flamingo );
+				mixer = THREE .AnimationMixer( flamingo );
 
 				mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
 
-				} ); */
+				} ); 
 
 
 
@@ -394,9 +393,9 @@
 			function animate() {
 
 				requestAnimationFrame( animate );
-
-				//const delta = clock.getDelta();
-				//if ( mixer ) mixer.update( delta );
+				
+				var delta = clock.getDelta();
+				if ( mixer ) mixer.update( delta );
 
 				render();
 				stats.update();
@@ -419,7 +418,7 @@
 				//shiba.position.x = Math.cos( time ) * 50  ;
 				water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
-				if ( mixer ) {
+/* 				if ( mixer ) {
 
 					const time = Date.now();
 
@@ -427,7 +426,7 @@
 
 					prevTime = time;
 
-				}
+				} */
 				//let temp = flamingo.position.z;
 				//x max = 550
 				//x min = -730
@@ -466,13 +465,13 @@
 					break;
 				}
 				 */
-				//flamingo.rotation.y = time - 4.5;
-				//flamingo.position.z = Math.cos(time) * 465 + 215; 
-				//flamingo.position.x = Math.sin(time) * 640 - 90;
+				flamingo.rotation.y = time - 4.5;
+				flamingo.position.z = Math.cos(time) * 465 + 215; 
+				flamingo.position.x = Math.sin(time) * 640 - 90;
 
 				// 34an a5leeh ytl3 w ynzl bra7a zy el island
 				// el 200 da el base zyada f el y
-				//flamingo.position.y = Math.sin( time ) * 40 + 700 ;
+				flamingo.position.y = Math.sin( time ) * 40 + 700 ;
 			/* 	if (horse.position.z < 30){
 					horse.rotation.y = Math.PI;
 				} */
