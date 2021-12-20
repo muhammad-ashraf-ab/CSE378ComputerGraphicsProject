@@ -27,13 +27,22 @@
 
 			let container, stats;
 			let camera, scene, renderer;
-			let controls, water, sun, mesh, light;
-			let island, shiba, boat, girl, person, flamingo, model;
-			let mixer, fbx;
+			let controls, water, sun, light;
+			let island, island2;
+			let shiba, boat, girl, person, flamingo, model;
+			let mixer, mixer1, fbx;
 			let switchF = 0;
 			let prevTime = Date.now();
 			const clock = new THREE.Clock();
 			const mixers = [];
+
+			const parameters = {
+					elevation: 20,
+					azimuth: 180,
+					x: 0,
+					y: 0,
+					z: 0, 
+				};
 
 			const time = performance.now() * 0.001;
 
@@ -102,10 +111,7 @@
 				skyUniforms[ 'mieCoefficient' ].value = 0.005;
 				skyUniforms[ 'mieDirectionalG' ].value = 0.8;
 
-				const parameters = {
-					elevation: 20,
-					azimuth: 180
-				};
+				
 
 				const pmremGenerator = new THREE.PMREMGenerator( renderer );
 
@@ -130,12 +136,6 @@
 				const geometry = new THREE.BoxGeometry( 30, 30, 30 );
 				const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
 
-				mesh = new THREE.Mesh( geometry, material );
-/* 				island = new THREE.Mesh(new THREE.CylinderGeometry(30, 40, 10));
-				island.receiveShadow = true;
-				island.material =  new THREE.MeshStandardMaterial( { color: 0x00ff00,roughness: 0 } );
-				scene.add( island); */
-
 				light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
   				light.position.set(0, 1, 0);
         		scene.add(light);
@@ -148,7 +148,7 @@
 				const loader2 = new FBXLoader();
 
 
-				loader2.load( 'models/fbx/Run.fbx', function ( object ) {
+			/* 	loader2.load( 'models/fbx/Run.fbx', function ( object ) {
 				object.rotation.y = Math.PI;
 				object.position.y = 80;
 				object.position.x = 370;
@@ -173,8 +173,8 @@
 					scene.add( object );
 
 				} );
-
-
+ */
+ 
 
 				/* loader2.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
 				//	object.scale.set(0.2,0.2,0.2);
@@ -187,18 +187,26 @@
 				});
 				  */
 
-				loader1.load( 'models/gltf/iland.glb', function ( gltf ) {
+				loader1.load( 'models/gltf/sand.glb', function ( gltf ) {
 				island = gltf.scene;
-				island.scale.x = 5;
-				island.scale.y = 5;
-				island.scale.z = 5;
-				scene.add( island );
+				
+				island.scale.set(30, 30, 30);
+				island.position.set (-600, 300, 0);
+				island.rotation.set (Math.PI/28, Math.PI/4, Math.PI/-256);
 
+				scene.add( island );
+				
+				island2 = island.clone();
+				island2.position.set (600, 100, 4000);
+				//island = gltf.scene.children[ 2 ];
+				scene.add (island2);
+				console.log(scene.children);
 				}, undefined, function ( error ) {
 
 				console.error( error );
 
 				} );
+
 
 				loader1.load( 'models/gltf/shiba.glb', function ( gltf1 ) {
 				shiba = gltf1.scene;
@@ -254,7 +262,7 @@
 				scene.add( skeleton ); */
 
 
-		 		loader1.load( "models/gltf/flamingo.glb", function ( gltf ) {
+		 		loader1.load( "models/gltf/Parrot.glb", function ( gltf ) {
 
 				flamingo = gltf.scene.children[ 0 ];
 				flamingo.scale.set( 0.7, 0.7, 0.7 );
@@ -266,9 +274,9 @@
 				flamingo.position.z = -250;
 				scene.add( flamingo );
 
-				mixer = THREE .AnimationMixer( flamingo );
+				mixer1 = new THREE.AnimationMixer( flamingo );
 
-				mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
+				mixer1.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
 
 				} ); 
 
@@ -346,6 +354,12 @@
 				folderSky.add( parameters, 'azimuth', - 180, 180, 0.1 ).onChange( updateSun );
 				folderSky.open();
 
+				const folderIsland = gui.addFolder ('Island');
+				folderIsland.add( parameters, 'x', 0, 2 * Math.PI, Math.PI/180 );
+				folderIsland.add( parameters, 'y', 0, 2 * Math.PI, Math.PI/180 );
+				folderIsland.add( parameters, 'z', 0, 2 * Math.PI, Math.PI/180  );
+				folderIsland.open();
+
 				const waterUniforms = water.material.uniforms;
 
 				const folderWater = gui.addFolder( 'Water' );
@@ -358,6 +372,8 @@
 				window.addEventListener( 'resize', onWindowResize );
 				
 			}
+
+			
 
 			function onWindowResize() {
 
@@ -396,23 +412,22 @@
 				
 				var delta = clock.getDelta();
 				if ( mixer ) mixer.update( delta );
+				if ( mixer1 ) mixer1.update( delta );
 
-				render();
+				render(parameters.x, parameters.y, parameters.z);
 				stats.update();
 
 
 			}
 
 
-			function render() {
-
+			function render(islandx, islandy, islandz) {
+				island.rotation.x = islandx;
+				island.rotation.y = islandy;
+				island.rotation.z = islandz;
 				const time = performance.now() * 0.001;
+				
 
-				mesh.position.y = Math.sin( time ) * 20 + 5;
-				mesh.rotation.x = time * 0.5;
-				mesh.rotation.z = time * 0.51;
-				//island.position.y = Math.sin( time ) ;
-				island.position.y = Math.cos( time ) * 5 + 80 ;
 				boat.position.y = Math.cos( time ) * 5;
 				shiba.position.y = Math.cos( time ) * 5 + 85 ;
 				//shiba.position.x = Math.cos( time ) * 50  ;
