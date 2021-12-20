@@ -290,6 +290,16 @@
 
 				//
 
+				
+				//const gridHelper = new THREE.GridHelper(900, 900, 0x888888, 0x444444 );
+				//gridHelper.position.y = 300;
+				//scene.add( gridHelper );
+
+				const axesHelper = new THREE.AxesHelper(1000)
+            	scene.add(axesHelper)
+				
+				//
+
 				stats = new Stats();
 				container.appendChild( stats.dom );
 
@@ -426,7 +436,7 @@
 
 				// 34an a5leeh ytl3 w ynzl bra7a zy el island
 				// el 200 da el base zyada f el y
-				horse.position.y = Math.cos( time ) * 4 + 500 ;
+				horse.position.y = Math.cos( time ) * 4 + 80 ;
 			/* 	if (horse.position.z < 30){
 					horse.rotation.y = Math.PI;
 				} */
