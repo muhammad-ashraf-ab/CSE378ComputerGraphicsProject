@@ -27,16 +27,15 @@
 
 			let container, stats;
 			let camera, scene, renderer;
-			let controls, water, sun, mesh;
+			let controls, water, sun, mesh, light;
 			let island, shiba, boat, girl, person, flamingo, model;
-			let mixer, skeleton;
+			let mixer, fbx;
 			let switchF = 0;
 			let prevTime = Date.now();
 			const clock = new THREE.Clock();
 
 
 			const time = performance.now() * 0.001;
-
 
 			init();
 			animate();
@@ -144,9 +143,50 @@
 				//island.material =  new THREE.MeshStandardMaterial( { color: 0x00ff00,roughness: 0 } );
 
 				//scene.add( island);
+				light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+  				light.position.set(0, 1, 0);
+        		scene.add(light);
 
+        		light = new THREE.DirectionalLight(0xffffff, 1.0);
+       			light.position.set(0, 1, 0);
+        		scene.add(light);
+ 
 				const loader1 = new GLTFLoader();
 				const loader2 = new FBXLoader();
+
+
+				loader2.load( 'models/fbx/falirMan.fbx', function ( object ) {
+				object.position.y = 300;
+				mixer = new THREE.AnimationMixer( object );
+
+				const action = mixer.clipAction( object.animations[ 0 ] );
+				action.play();
+
+				object.traverse( function ( child ) {
+
+					if ( child.isMesh ) {
+
+						child.castShadow = true;
+						child.receiveShadow = true;
+
+					}
+
+				} );
+					
+					scene.add( object );
+
+				} );
+
+				/* loader2.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
+				//	object.scale.set(0.2,0.2,0.2);
+					object.traverse ( function ( child ) {
+						if ( child.isMesh ) {
+							child.castShadow = true;
+						}
+					});
+					scene.add(object);
+				});
+				  */
 
 				loader1.load( 'models/gltf/iland.glb', function ( gltf ) {
 				island = gltf.scene;
@@ -196,25 +236,26 @@
 
 				} );
 
-				loader1.load( 'models/gltf/Soldier.glb', function ( gltf ) {
+/* 				loader1.load( 'models/gltf/RobotExpressive/RobotExpressive.glb', function ( gltf ) {
 
 				model = gltf.scene;
-				model.scale.set (5,5,5);
+				model.scale.set (20,20,20);
 				model.position.y = 600;
 				scene.add( model );
+				//createGUI( model, gltf.animations );
 
 				}, undefined, function ( error ) {
 
 				console.error( error );
 
 				} );
-
+ */
 		/* 		skeleton = new THREE.SkeletonHelper( model );
 				skeleton.visible = false;
 				scene.add( skeleton ); */
 
 
-				loader1.load( "models/gltf/flamingo.glb", function ( gltf ) {
+		/* 		loader1.load( "models/gltf/flamingo.glb", function ( gltf ) {
 
 				flamingo = gltf.scene.children[ 0 ];
 				flamingo.scale.set( 0.7, 0.7, 0.7 );
@@ -230,7 +271,7 @@
 
 				mixer.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
 
-				} );
+				} ); */
 
 
 
@@ -269,35 +310,6 @@
 				console.error( error );
 
 				} ); */
-
-				
-				
-
-				/* loader2.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
-
-					mixer = new THREE.AnimationMixer( object );
-					
-					person = object;
-					person.position.y = 600;
-
-					const action = mixer.clipAction( object.animations[ 0 ] );
-					action.play();
-
-					object.traverse( function ( child ) {
-
-						if ( child.isMesh ) {
-
-							//child.castShadow = true;
-							//child.receiveShadow = true;
-
-						}
-
-					} );
-
-				scene.add( object );
-
-				}); */
-
 
 				//
 				
@@ -379,7 +391,6 @@
 
 			} */
 
-
 			function animate() {
 
 				requestAnimationFrame( animate );
@@ -390,7 +401,9 @@
 				render();
 				stats.update();
 
+
 			}
+
 
 			function render() {
 
@@ -415,7 +428,7 @@
 					prevTime = time;
 
 				}
-				let temp = flamingo.position.z;
+				//let temp = flamingo.position.z;
 				//x max = 550
 				//x min = -730
 				//z max = 680
@@ -453,13 +466,13 @@
 					break;
 				}
 				 */
-				flamingo.rotation.y = time - 4.5;
-				flamingo.position.z = Math.cos(time) * 465 + 215; 
-				flamingo.position.x = Math.sin(time) * 640 - 90;
+				//flamingo.rotation.y = time - 4.5;
+				//flamingo.position.z = Math.cos(time) * 465 + 215; 
+				//flamingo.position.x = Math.sin(time) * 640 - 90;
 
 				// 34an a5leeh ytl3 w ynzl bra7a zy el island
 				// el 200 da el base zyada f el y
-				flamingo.position.y = Math.sin( time ) * 40 + 700 ;
+				//flamingo.position.y = Math.sin( time ) * 40 + 700 ;
 			/* 	if (horse.position.z < 30){
 					horse.rotation.y = Math.PI;
 				} */
