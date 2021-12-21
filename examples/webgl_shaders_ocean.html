@@ -7,16 +7,20 @@
 		<link type="text/css" rel="stylesheet" href="main.css">
 	</head>
 	<body>
+		<section id="loading-screen">
 
+			<div id="loader"></div>
+		
+		</section>
 		<div id="container"></div>
 		<div id="info">
+			
 			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - webgl ocean
 		</div>
 
 		<script type="module">
 
 			import * as THREE from '../build/three.module.js';
-
 			import Stats from './jsm/libs/stats.module.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
@@ -28,13 +32,16 @@
 			let container, stats;
 			let camera, scene, renderer;
 			let controls, water, sun, light;
+
+			//define objects
 			let island, island2;
-			let shiba, boat, girl, person, flamingo, model;
-			let mixer, mixer1, fbx;
+			let shiba, boat, girl, person, flamingo, model, ninja;
+
+			//define mixers
+			let mixer, mixer1, mixer2, fbx;
 			let switchF = 0;
 			let prevTime = Date.now();
 			const clock = new THREE.Clock();
-			const mixers = [];
 
 			const parameters = {
 					elevation: 20,
@@ -44,6 +51,7 @@
 					z: 0, 
 				};
 
+
 			const time = performance.now() * 0.001;
 
 			init();
@@ -51,6 +59,42 @@
 
 			function init() {
 
+
+				const loadingManager = new THREE.LoadingManager( () => {
+	
+				const loadingScreen = document.getElementById( 'loading-screen' );
+				loadingScreen.classList.add( 'fade-out' );
+	
+				// optional: remove loader from DOM via event listener
+				loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
+	
+				} );
+
+				/* const manager = new THREE.LoadingManager();
+				manager.onStart = function(url, itemsLoaded, itemsTotal){
+					console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+
+				};
+
+				manager.onLoad = function ( ) {
+
+					console.log( 'Loading complete!');
+
+				};
+
+				manager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+
+					console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+
+				};
+
+				manager.onError = function ( url ) {
+
+					console.log( 'There was an error loading ' + url );
+
+				}; */
+	
+				
 				container = document.getElementById( 'container' );
 
 				//
@@ -133,9 +177,15 @@
 
 				//
 
-				const geometry = new THREE.BoxGeometry( 30, 30, 30 );
-				const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
+				
+				// intiate loaders
+				const gltfLoader = new GLTFLoader(loadingManager);
+				const fbxLoader = new FBXLoader(loadingManager);
 
+				//const geometry = new THREE.BoxGeometry( 30, 30, 30 );
+				//const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
+
+				// add light source to make fbx objects appear
 				light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
   				light.position.set(0, 1, 0);
         		scene.add(light);
@@ -143,17 +193,14 @@
         		light = new THREE.DirectionalLight(0xffffff, 1.0);
        			light.position.set(0, 1, 0);
         		scene.add(light);
- 
-				const loader1 = new GLTFLoader();
-				const loader2 = new FBXLoader();
 
-
-			/* 	loader2.load( 'models/fbx/Run.fbx', function ( object ) {
+				// load the running ninja model
+			 	fbxLoader.load( 'models/fbx/Run.fbx', function ( object ) {
+				ninja = object.scene;
 				object.rotation.y = Math.PI;
-				object.position.y = 80;
-				object.position.x = 370;
-				object.position.z = -370;
-				object.scale.set (0.5,0.5,0.5);
+				object.position.set (370, 80, -370);
+				//object.scale.set (2,2,2);
+
 				mixer = new THREE.AnimationMixer( object );
 
 				const action = mixer.clipAction( object.animations[ 0 ] );
@@ -173,23 +220,23 @@
 					scene.add( object );
 
 				} );
- */
- 
 
-				/* loader2.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
-				//	object.scale.set(0.2,0.2,0.2);
-					object.traverse ( function ( child ) {
+				// Load the samba dancing guy
+				fbxLoader.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
+				mixer2 = new THREE.AnimationMixer( object );
+				const action = mixer2.clipAction( object.animations[ 0 ] );
+				action.play();
+				object.traverse ( function ( child ) {
 						if ( child.isMesh ) {
 							child.castShadow = true;
 						}
 					});
 					scene.add(object);
 				});
-				  */
-
-				loader1.load( 'models/gltf/sand.glb', function ( gltf ) {
+				  
+				//load islands
+				gltfLoader.load( 'models/gltf/sand.glb', function ( gltf ) {
 				island = gltf.scene;
-				
 				island.scale.set(30, 30, 30);
 				island.position.set (-600, 300, 0);
 				island.rotation.set (Math.PI/28, Math.PI/4, Math.PI/-256);
@@ -198,25 +245,21 @@
 				
 				island2 = island.clone();
 				island2.position.set (600, 100, 4000);
-				//island = gltf.scene.children[ 2 ];
 				scene.add (island2);
-				console.log(scene.children);
+
+				//console.log(scene.children);
 				}, undefined, function ( error ) {
 
 				console.error( error );
 
 				} );
 
-
-				loader1.load( 'models/gltf/shiba.glb', function ( gltf1 ) {
-				shiba = gltf1.scene;
-				shiba.position.y = 0;
-				shiba.position.x = 300;
-				shiba.position.z = -330;
+				//Load Doggo
+				gltfLoader.load( 'models/gltf/shiba.glb', function ( gltf ) {
+				shiba = gltf.scene;
+				shiba.position.set (300, 0, -330);
+				shiba.scale.set (30, 30, 30);
 				shiba.rotation.y = 60;
-				shiba.scale.x = 30;
-				shiba.scale.y = 30;
-				shiba.scale.z = 30;
 				scene.add( shiba );
 
 				}, undefined, function ( error ) {
@@ -224,17 +267,12 @@
 				console.error( error );
 
 				} );
-
-				loader1.load( 'models/gltf/boat.glb', function ( gltf2 ) {
-				boat = gltf2.scene;
-				boat.position.y = 0;
-				boat.position.x = 300;
-				boat.position.z = -625;
-				boat.rotation.x = 50;
-				//boat.scale.x = 0.5;
-				//boat.scale.y = 0.5;
-				//boat.scale.z = 0.5;
 				
+				//Load Boat
+				gltfLoader.load( 'models/gltf/boat.glb', function ( gltf ) {
+				boat = gltf.scene;
+				boat.position.set(300, 0, -625);
+				boat.rotation.x = 50;
 				scene.add( boat );
 
 				}, undefined, function ( error ) {
@@ -243,82 +281,19 @@
 
 				} );
 
-/* 				loader1.load( 'models/gltf/RobotExpressive/RobotExpressive.glb', function ( gltf ) {
-
-				model = gltf.scene;
-				model.scale.set (20,20,20);
-				model.position.y = 600;
-				scene.add( model );
-				//createGUI( model, gltf.animations );
-
-				}, undefined, function ( error ) {
-
-				console.error( error );
-
-				} );
- */
-		/* 		skeleton = new THREE.SkeletonHelper( model );
-				skeleton.visible = false;
-				scene.add( skeleton ); */
-
-
-		 		loader1.load( "models/gltf/Parrot.glb", function ( gltf ) {
-
+				//Load Flamingo
+				gltfLoader.load( "models/gltf/Flamingo.glb", function ( gltf ) {
+				flamingo = gltf.scene;
 				flamingo = gltf.scene.children[ 0 ];
 				flamingo.scale.set( 0.7, 0.7, 0.7 );
-				//horse.position.y = 50;
-				//x max = 550
-				//x min = -730
-				//z max = 680
-				//z min = -250
 				flamingo.position.z = -250;
 				scene.add( flamingo );
 
 				mixer1 = new THREE.AnimationMixer( flamingo );
-
 				mixer1.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
 
 				} ); 
 
-
-
-				/* loader1.load( './models/gltf/wintergirl.glb', function ( gltf3 ) {
-				girl = gltf3.scene;
-		
-				girl.position.y = 0;
-				girl.scale.x = 6;
-				girl.scale.y = 6;
-				girl.scale.z = 6;
-				girl.rotation.y = Math.PI;
-				scene.add( girl );
-
-				girl.traverse( function ( object ) {
-
-					if ( object.isMesh ) object.castShadow = true;
-
-				} );
-
-				const animations = gltf.animations;
-
-				mixer = new THREE.AnimationMixer( model );
-
-				idleAction = mixer.clipAction( animations[ 0 ] );
-				walkAction = mixer.clipAction( animations[ 3 ] );
-				runAction = mixer.clipAction( animations[ 1 ] );
-
-				actions = [ idleAction, walkAction, runAction ];
-				
-				activateAllActions();
-				animate();
-		
-
-				}, undefined, function ( error ) {
-
-				console.error( error );
-
-				} ); */
-
-				//
 				
 				//
 
@@ -330,11 +305,6 @@
 				controls.update();
 
 				//
-
-				
-				//const gridHelper = new THREE.GridHelper(900, 900, 0x888888, 0x444444 );
-				//gridHelper.position.y = 300;
-				//scene.add( gridHelper );
 
 				const axesHelper = new THREE.AxesHelper(1000)
 				axesHelper.position.y = 100;
@@ -373,7 +343,11 @@
 				
 			}
 
-			
+			function onTransitionEnd( event ) {
+
+			event.target.remove();
+	
+			}
 
 			function onWindowResize() {
 
@@ -384,28 +358,6 @@
 
 			}
 
-			/* function activateAllActions() {
-
-			setWeight( idleAction, settings[ 'modify idle weight' ] );
-			setWeight( walkAction, settings[ 'modify walk weight' ] );
-			setWeight( runAction, settings[ 'modify run weight' ] );
-
-			actions.forEach( function ( action ) {
-
-				action.play();
-
-				} );
-
-			} */
-
-			/* function setWeight( action, weight ) {
-
-			action.enabled = true;
-			action.setEffectiveTimeScale( 1 );
-			action.setEffectiveWeight( weight );
-
-			} */
-
 			function animate() {
 
 				requestAnimationFrame( animate );
@@ -413,6 +365,7 @@
 				var delta = clock.getDelta();
 				if ( mixer ) mixer.update( delta );
 				if ( mixer1 ) mixer1.update( delta );
+				if ( mixer2 ) mixer2.update( delta );
 
 				render(parameters.x, parameters.y, parameters.z);
 				stats.update();
@@ -426,60 +379,12 @@
 				island.rotation.y = islandy;
 				island.rotation.z = islandz;
 				const time = performance.now() * 0.001;
-				
 
 				boat.position.y = Math.cos( time ) * 5;
 				shiba.position.y = Math.cos( time ) * 5 + 85 ;
-				//shiba.position.x = Math.cos( time ) * 50  ;
+
 				water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
-/* 				if ( mixer ) {
-
-					const time = Date.now();
-
-					mixer.update( ( time - prevTime ) * 0.001 );
-
-					prevTime = time;
-
-				} */
-				//let temp = flamingo.position.z;
-				//x max = 550
-				//x min = -730
-				//z max = 680
-				//z min = -250
-				//z avg = 215
-				//x avg = -90
-/* 				var rotFlag;
-
-				if ( (Math.sin(time) > 0.98) && rotFlag != 0){
-		
-					rotFlag = 0;
-				}
-				else if ((Math.sin(time) < -0.98) && rotFlag != 1){
-					rotFlag = 1;
-				}
-				else if ((Math.cos(time) > 0.98) && rotFlag != 2){
-					rotFlag = 2;
-				}
-				else if ((Math.sin(time) > -0.98) && rotFlag != 3){
-					rotFlag = 3;
-				}
-				switch (rotFlag) {
-
-				case 0:
-					horse.rotation.y = time * 2- 5 ;
-					break;
-				case 1:
-					horse.rotation.y = time * 2 - 5 ;
-					break;
-				case 2:
-					horse.rotation.y = time * 2- 5 ;
-					break;
-				case 3:
-					horse.rotation.y = time * 2- 5 ;
-					break;
-				}
-				 */
 				flamingo.rotation.y = time - 4.5;
 				flamingo.position.z = Math.cos(time) * 465 + 215; 
 				flamingo.position.x = Math.sin(time) * 640 - 90;
