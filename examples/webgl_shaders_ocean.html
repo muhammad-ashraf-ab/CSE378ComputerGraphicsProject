@@ -36,10 +36,11 @@
 
 			//define objects
 			let island, island2;
-			let beetleCar, boat, girl, person, flamingo, model, ninja, road, rocks, sidewalk, sidewalk2, sidewalk3, sidewalk4 ;
-
+			let boat, girl, person, flamingo, model, driveMan, road, rocks, sidewalk, sidewalk2, sidewalk3, sidewalk4 ;
+			let highway, roadblock;
+			let animCar, beetleCar;
 			//define mixers
-			let mixer, mixer1, mixer2, fbx;
+			let mixer, mixer1, mixer2, mixer3;
 			let switchF = 0;
 			let prevTime = Date.now();
 			const clock = new THREE.Clock();
@@ -199,33 +200,6 @@
        			light.position.set(0, 1, 0);
         		scene.add(light);
 
-/* 				// load the running ninja model
-			 	fbxLoader.load( 'models/fbx/Run.fbx', function ( object ) {
-				ninja = object;
-				ninja.rotation.y = Math.PI;
-				ninja.position.set (370, 0, 4990);
-				//object.scale.set (2,2,2);
-
-				mixer = new THREE.AnimationMixer( ninja );
-
-				const action = mixer.clipAction( ninja.animations[ 0 ] );
-				action.play();
-
-				ninja.traverse( function ( child ) {
-
-					if ( child.isMesh ) {
-
-						child.castShadow = true;
-						child.receiveShadow = true;
-
-					}
-
-				} );
-					
-					scene.add( ninja );
-
-				} ); */
-
 				// Load the samba dancing guy
 /* 				fbxLoader.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
 				mixer2 = new THREE.AnimationMixer( object );
@@ -262,7 +236,7 @@
 				} ); */
 
 				// add rocks
- 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
+ /* 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
 				rocks = gltf.scene;
 				rocks.scale.set(100, 100, 100);
 				rocks.rotation.z = -0.09;
@@ -278,17 +252,16 @@
 
 				console.error( error );
 
-				} );
+				} ); */
  
 				// add sidewalk
 				const oGroup = new THREE.Group();
-				const lGroup = new THREE.Group();
 
 				gltfLoader.load( 'models/gltf/sidewalk/scene.gltf', function ( gltf ) {
 				sidewalk = gltf.scene;
 				sidewalk.scale.set(40, 40, 80);
 				//x -3000
-				sidewalk.position.set (-90, 1000, 0);
+				sidewalk.position.set (-210, 1000, 0);
 
 				//scene.add( sidewalk );
 
@@ -335,24 +308,62 @@
 				//x -2910
 				road.position.set (0, 990, 13);
 
-				let rgrps = [];
-				let crntpos1 = 5620;
+				var road2 = road.clone();
+				road2.position.x = -120;
+
+				oGroup.add(road);
+				oGroup.add(road2);
+				//scene.add(sidewalk2);
+				//scene.add(oGroup);
+
+				let sgrps = [];
+				let crntpos = 5620;
 				for (var i = 0; i < 17; i++){
- 					crntpos1 -= 630;
- 			 		rgrps[i] = road.clone();
-  					rgrps[i].position.z = crntpos1;
-					//rgrps[i].position.x = -4900;
-  					scene.add(rgrps[i]);
-				} 
-				
+ 					crntpos -= 620;
+ 			 		sgrps[i] = oGroup.clone();
+  					if( i % 2 == 0 )
+  					sgrps[i].position.z = crntpos;
+  					scene.add(sgrps[i]);
+					} 	
 
 				}, undefined, function ( error ) {
 
 				console.error( error );
 				} );
 
+				// add right and left stone fence
+				gltfLoader.load( 'models/gltf/fence/scene.gltf', 
+				function ( gltf ) {
+				highway = gltf.scene;
+				highway.scale.set(10, 10, 10);
+				//x -2910
+				highway.rotation.y = Math.PI/2;
+				highway.position.set (128, 1000, 0);
+				
+				var highway2 = highway.clone();
+				highway2.position.x = -245;
 
-				//Load car
+				oGroup.add(highway);
+				oGroup.add(highway2);
+				//scene.add(sidewalk2);
+				//scene.add(oGroup);
+
+				let sgrps = [];
+				let crntpos = 5620;
+				for (var i = 0; i < 17; i++){
+ 					crntpos -= 620;
+ 			 		sgrps[i] = oGroup.clone();
+  					if( i % 2 == 0 )
+  					sgrps[i].position.z = crntpos;
+  					scene.add(sgrps[i]);
+					} 
+
+				}, undefined, function ( error ) {
+
+				console.error( error );
+				} );
+
+				//Load static beetle car
 				gltfLoader.setDRACOLoader (dracoLoader);
 				gltfLoader.load( 'models/gltf/beetlecar/scene.gltf', function ( gltf ) {
 				const material = new THREE.MeshStandardMaterial({ color: 0x606060});
@@ -368,6 +379,47 @@
 				console.error( error );
 
 				} ); 
+				
+				//Load moving car
+				gltfLoader.load( "models/gltf/animcar/scene.gltf", function ( gltf ) {
+				animCar = gltf.scene;
+				animCar = gltf.scene.children[ 0 ];
+				animCar.scale.set( 0.3, 0.3, 0.3 );
+				animCar.position.set (0, 1000, 0);
+				scene.add( animCar );
+
+				mixer3 = new THREE.AnimationMixer( animCar );
+				mixer3.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
+
+				} );
+				
+				// load the driving man model
+			 	fbxLoader.load( 'models/fbx/Driving.fbx', function ( object ) {
+				driveMan = object;
+				//driveMan.rotation.y = Math.PI;
+				driveMan.position.set (-12, 1009, 9);
+				driveMan.scale.set (0.28, 0.28, 0.28);
+
+				mixer = new THREE.AnimationMixer( driveMan );
+
+				const action = mixer.clipAction( driveMan.animations[ 0 ] );
+				action.play();
+
+				driveMan.traverse( function ( child ) {
+
+					if ( child.isMesh ) {
+
+						child.castShadow = true;
+						child.receiveShadow = true;
+
+					}
+
+				} );
+					
+					scene.add( driveMan );
+
+				} ); 
+
 				
 /* 				//Load Boat
 				gltfLoader.load( 'models/gltf/boat.glb', function ( gltf ) {
@@ -470,6 +522,7 @@
 				if ( mixer ) mixer.update( delta  );
 				if ( mixer1 ) mixer1.update( delta );
 				if ( mixer2 ) mixer2.update( delta );
+				if ( mixer3 ) mixer3.update( delta );
 
 				render(parameters);
 				stats.update();
@@ -485,7 +538,8 @@
 				island.position.x = parameters.xp;
 				island.position.z = parameters.zp; */
 				const time = performance.now() * 0.001;
-
+				animCar.position.z = Math.sin(time) * 560;
+				driveMan.position.z = Math.sin(time) * 560;
 /* 				boat.position.y = Math.cos( time ) * 5;
 				shiba.position.y = Math.cos( time ) * 5 + 85 ; */
 
