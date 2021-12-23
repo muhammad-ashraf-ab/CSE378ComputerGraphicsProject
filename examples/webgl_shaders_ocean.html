@@ -24,6 +24,7 @@
 			import Stats from './jsm/libs/stats.module.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 			import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+			import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 			import { GUI } from './jsm/libs/lil-gui.module.min.js';
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
 			import { Water } from './jsm/objects/Water.js';
@@ -35,7 +36,7 @@
 
 			//define objects
 			let island, island2;
-			let shiba, boat, girl, person, flamingo, model, ninja, road, rocks, sidewalk, sidewalk2, sidewalk3, sidewalk4 ;
+			let beetleCar, boat, girl, person, flamingo, model, ninja, road, rocks, sidewalk, sidewalk2, sidewalk3, sidewalk4 ;
 
 			//define mixers
 			let mixer, mixer1, mixer2, fbx;
@@ -183,6 +184,8 @@
 				// intiate loaders
 				const gltfLoader = new GLTFLoader(loadingManager);
 				const fbxLoader = new FBXLoader(loadingManager);
+				const dracoLoader = new DRACOLoader(loadingManager);
+				dracoLoader.setDecoderPath( 'js/libs/draco/gltf/' );
 
 				//const geometry = new THREE.BoxGeometry( 30, 30, 30 );
 				//const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
@@ -259,13 +262,14 @@
 				} ); */
 
 				// add rocks
-/* 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
+ 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
 				rocks = gltf.scene;
 				rocks.scale.set(100, 100, 100);
-				rocks.position.set (-3200, 250,  -4890);
+				rocks.rotation.z = -0.09;
+				rocks.position.set (200, 1100, -300);
 
 				var rocks2 = rocks.clone();
-				rocks2.position.set (-2090, 250, -4890);
+				rocks2.position.set (310, 1170, -300);
 				scene.add (rocks2);
 
 				scene.add( rocks );
@@ -275,7 +279,7 @@
 				console.error( error );
 
 				} );
- */
+ 
 				// add sidewalk
 				const oGroup = new THREE.Group();
 				const lGroup = new THREE.Group();
@@ -348,23 +352,22 @@
 				} );
 
 
-				
-
-
-
-/* 				//Load Doggo
-				gltfLoader.load( 'models/gltf/shiba.glb', function ( gltf ) {
-				shiba = gltf.scene;
-				shiba.position.set (300, 0, -330);
-				shiba.scale.set (30, 30, 30);
-				shiba.rotation.y = 60;
-				scene.add( shiba );
+				//Load car
+				gltfLoader.setDRACOLoader (dracoLoader);
+				gltfLoader.load( 'models/gltf/beetlecar/scene.gltf', function ( gltf ) {
+				const material = new THREE.MeshStandardMaterial({ color: 0x606060});
+				//shiba = new THREE.Mesh( geometry, material );
+				beetleCar = gltf.scene;
+				beetleCar.position.set (200, 1000, 0);
+				beetleCar.scale.set (0.4, 0.4, -0.4);
+				beetleCar.rotation.y = Math.PI/-1.5;
+				scene.add( beetleCar );
 
 				}, undefined, function ( error ) {
 
 				console.error( error );
 
-				} ); */
+				} ); 
 				
 /* 				//Load Boat
 				gltfLoader.load( 'models/gltf/boat.glb', function ( gltf ) {
