@@ -35,7 +35,7 @@
 
 			//define objects
 			let island, island2;
-			let shiba, boat, girl, person, flamingo, model, ninja;
+			let shiba, boat, girl, person, flamingo, model, ninja, road, rocks, sidewalk, sidewalk2, sidewalk3, sidewalk4 ;
 
 			//define mixers
 			let mixer, mixer1, mixer2, fbx;
@@ -49,6 +49,8 @@
 					x: 0,
 					y: 0,
 					z: 0, 
+					xp: 0,
+					zp: 0,
 				};
 
 
@@ -194,19 +196,19 @@
        			light.position.set(0, 1, 0);
         		scene.add(light);
 
-				// load the running ninja model
+/* 				// load the running ninja model
 			 	fbxLoader.load( 'models/fbx/Run.fbx', function ( object ) {
-				ninja = object.scene;
-				object.rotation.y = Math.PI;
-				object.position.set (370, 80, -370);
+				ninja = object;
+				ninja.rotation.y = Math.PI;
+				ninja.position.set (370, 0, 4990);
 				//object.scale.set (2,2,2);
 
-				mixer = new THREE.AnimationMixer( object );
+				mixer = new THREE.AnimationMixer( ninja );
 
-				const action = mixer.clipAction( object.animations[ 0 ] );
+				const action = mixer.clipAction( ninja.animations[ 0 ] );
 				action.play();
 
-				object.traverse( function ( child ) {
+				ninja.traverse( function ( child ) {
 
 					if ( child.isMesh ) {
 
@@ -217,13 +219,15 @@
 
 				} );
 					
-					scene.add( object );
+					scene.add( ninja );
 
-				} );
+				} ); */
 
 				// Load the samba dancing guy
-				fbxLoader.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
+/* 				fbxLoader.load( './models/fbx/Samba Dancing.fbx', function ( object ) {
 				mixer2 = new THREE.AnimationMixer( object );
+				object.position.y = 600;
+				object.scale.set (5,5,5);
 				const action = mixer2.clipAction( object.animations[ 0 ] );
 				action.play();
 				object.traverse ( function ( child ) {
@@ -232,13 +236,13 @@
 						}
 					});
 					scene.add(object);
-				});
+				}); */
 				  
 				//load islands
-				gltfLoader.load( 'models/gltf/sand.glb', function ( gltf ) {
+/* 				gltfLoader.load( 'models/gltf/sand.glb', function ( gltf ) {
 				island = gltf.scene;
-				island.scale.set(30, 30, 30);
-				island.position.set (-600, 300, 0);
+				island.scale.set(50, 50, 50);
+				island.position.set (0, 150, 0);
 				island.rotation.set (Math.PI/28, Math.PI/4, Math.PI/-256);
 
 				scene.add( island );
@@ -252,9 +256,103 @@
 
 				console.error( error );
 
+				} ); */
+
+				// add rocks
+/* 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
+				rocks = gltf.scene;
+				rocks.scale.set(100, 100, 100);
+				rocks.position.set (-3200, 250,  -4890);
+
+				var rocks2 = rocks.clone();
+				rocks2.position.set (-2090, 250, -4890);
+				scene.add (rocks2);
+
+				scene.add( rocks );
+				
+				}, undefined, function ( error ) {
+
+				console.error( error );
+
+				} );
+ */
+				// add sidewalk
+				const oGroup = new THREE.Group();
+				const lGroup = new THREE.Group();
+
+				gltfLoader.load( 'models/gltf/sidewalk/scene.gltf', function ( gltf ) {
+				sidewalk = gltf.scene;
+				sidewalk.scale.set(40, 40, 80);
+				//x -3000
+				sidewalk.position.set (-90, 1000, 0);
+
+				//scene.add( sidewalk );
+
+
+				sidewalk2 = sidewalk.clone();
+				sidewalk2.rotation.y = Math.PI;
+				//x -2821
+				sidewalk2.position.set (90, 1000, 26);
+
+
+				oGroup.add(sidewalk);
+				oGroup.add(sidewalk2);
+				//scene.add(sidewalk2);
+				//scene.add(oGroup);
+
+				let sgrps = [];
+				let crntpos = 5620;
+				for (var i = 0; i < 17; i++){
+ 					crntpos -= 620;
+ 			 		sgrps[i] = oGroup.clone();
+  					if( i % 2 == 0 )
+    					sgrps[i].scale.z = -1;
+  					sgrps[i].position.z = crntpos;
+  					scene.add(sgrps[i]);
+				}  
+
+
+/* 				var group2 = oGroup.clone();
+				group2.position.z = -620;
+				group2.scale.z = -1;
+				scene.add (group2); */
+
+				}, undefined, function ( error ) {
+
+				console.error( error );
+
+				});
+
+				// add road
+				gltfLoader.load( 'models/gltf/road/scene.gltf', 
+				function ( gltf ) {
+				road = gltf.scene;
+				road.scale.set(20, 20, 54);
+				//x -2910
+				road.position.set (0, 990, 13);
+
+				let rgrps = [];
+				let crntpos1 = 5620;
+				for (var i = 0; i < 17; i++){
+ 					crntpos1 -= 630;
+ 			 		rgrps[i] = road.clone();
+  					rgrps[i].position.z = crntpos1;
+					//rgrps[i].position.x = -4900;
+  					scene.add(rgrps[i]);
+				} 
+				
+
+				}, undefined, function ( error ) {
+
+				console.error( error );
 				} );
 
-				//Load Doggo
+
+				
+
+
+
+/* 				//Load Doggo
 				gltfLoader.load( 'models/gltf/shiba.glb', function ( gltf ) {
 				shiba = gltf.scene;
 				shiba.position.set (300, 0, -330);
@@ -266,9 +364,9 @@
 
 				console.error( error );
 
-				} );
+				} ); */
 				
-				//Load Boat
+/* 				//Load Boat
 				gltfLoader.load( 'models/gltf/boat.glb', function ( gltf ) {
 				boat = gltf.scene;
 				boat.position.set(300, 0, -625);
@@ -279,8 +377,8 @@
 
 				console.error( error );
 
-				} );
-
+				} ); */
+/* 
 				//Load Flamingo
 				gltfLoader.load( "models/gltf/Flamingo.glb", function ( gltf ) {
 				flamingo = gltf.scene;
@@ -292,7 +390,7 @@
 				mixer1 = new THREE.AnimationMixer( flamingo );
 				mixer1.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
 
-				} ); 
+				} );  */
 
 				
 				//
@@ -328,6 +426,9 @@
 				folderIsland.add( parameters, 'x', 0, 2 * Math.PI, Math.PI/180 );
 				folderIsland.add( parameters, 'y', 0, 2 * Math.PI, Math.PI/180 );
 				folderIsland.add( parameters, 'z', 0, 2 * Math.PI, Math.PI/180  );
+
+				folderIsland.add( parameters, 'xp', -5000, 5000, 1 );
+				folderIsland.add( parameters, 'zp', -5000, 5000, 1  );
 				folderIsland.open();
 
 				const waterUniforms = water.material.uniforms;
@@ -363,35 +464,42 @@
 				requestAnimationFrame( animate );
 				
 				var delta = clock.getDelta();
-				if ( mixer ) mixer.update( delta );
+				if ( mixer ) mixer.update( delta  );
 				if ( mixer1 ) mixer1.update( delta );
 				if ( mixer2 ) mixer2.update( delta );
 
-				render(parameters.x, parameters.y, parameters.z);
+				render(parameters);
 				stats.update();
 
 
 			}
 
 
-			function render(islandx, islandy, islandz) {
-				island.rotation.x = islandx;
-				island.rotation.y = islandy;
-				island.rotation.z = islandz;
+			function render(parameters) {
+/* 				island.rotation.x = parameters.x;
+				island.rotation.y = parameters.y;
+				island.rotation.z = parameters.z;
+				island.position.x = parameters.xp;
+				island.position.z = parameters.zp; */
 				const time = performance.now() * 0.001;
 
-				boat.position.y = Math.cos( time ) * 5;
-				shiba.position.y = Math.cos( time ) * 5 + 85 ;
+/* 				boat.position.y = Math.cos( time ) * 5;
+				shiba.position.y = Math.cos( time ) * 5 + 85 ; */
 
 				water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
+				//ninja.position.z = time * -150 + 4990;
+/* 				ninja.rotation.y = time - 4.5;
+				ninja.position.z = Math.cos(time) * 465 + 215; 
+				ninja.position.x = Math.sin(time) * 640 - 90; */
+/* 
 				flamingo.rotation.y = time - 4.5;
 				flamingo.position.z = Math.cos(time) * 465 + 215; 
-				flamingo.position.x = Math.sin(time) * 640 - 90;
+				flamingo.position.x = Math.sin(time) * 640 - 90; */
 
 				// 34an a5leeh ytl3 w ynzl bra7a zy el island
 				// el 200 da el base zyada f el y
-				flamingo.position.y = Math.sin( time ) * 40 + 700 ;
+				//flamingo.position.y = Math.sin( time ) * 40 + 200 ;
 			/* 	if (horse.position.z < 30){
 					horse.rotation.y = Math.PI;
 				} */
