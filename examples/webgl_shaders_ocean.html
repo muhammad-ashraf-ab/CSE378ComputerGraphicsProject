@@ -12,6 +12,7 @@
 			<div id="loader"></div>
 		
 		</section>
+
 		<div id="container"></div>
 		<div id="info">
 			
@@ -27,6 +28,7 @@
 			import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 			import { GUI } from './jsm/libs/lil-gui.module.min.js';
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			import { PositionalAudioHelper } from './jsm/helpers/PositionalAudioHelper.js';
 			import { Water } from './jsm/objects/Water.js';
 			import { Sky } from './jsm/objects/Sky.js';
 
@@ -39,8 +41,10 @@
 			let boat, girl, person, flamingo, model, driveMan, road, rocks, sidewalk, sidewalk2, sidewalk3, sidewalk4 ;
 			let highway, roadblock;
 			let animCar, beetleCar;
+		
 			//define mixers
 			let mixer, mixer1, mixer2, mixer3;
+
 			let switchF = 0;
 			let prevTime = Date.now();
 			const clock = new THREE.Clock();
@@ -54,10 +58,10 @@
 					xp: 0,
 					zp: 0,
 				};
-
-
-			const time = performance.now() * 0.001;
-
+			
+			//define sound
+			let sound;
+			let timeFlag = 0;
 			init();
 			animate();
 
@@ -188,6 +192,32 @@
 				const dracoLoader = new DRACOLoader(loadingManager);
 				dracoLoader.setDecoderPath( 'js/libs/draco/gltf/' );
 
+				const listener = new THREE.AudioListener();
+				camera.add( listener );
+
+/* 				const audioElement = document.getElementById( 'music' );
+				audioElement.play();
+
+				const positionalAudio = new THREE.PositionalAudio( listener );
+				positionalAudio.setMediaElementSource( audioElement );
+				positionalAudio.setRefDistance( 1 );
+				positionalAudio.setDirectionalCone( 180, 230, 0.1 );
+
+				const helper = new PositionalAudioHelper( positionalAudio, 0.1 );
+				positionalAudio.add( helper ); */
+
+				//
+				sound = new THREE.Audio(listener);
+
+				const audioLoader = new THREE.AudioLoader();
+				audioLoader.load(('sounds/376737_Skullbeatz___Bad_Cat_Maste.ogg'), function (buffer) {
+				sound.setBuffer( buffer );
+				sound.setLoop( true );
+				sound.setVolume( 0.5 );
+
+				});
+
+
 				//const geometry = new THREE.BoxGeometry( 30, 30, 30 );
 				//const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
 
@@ -216,7 +246,7 @@
 				}); */
 				  
 				//load islands
-/* 				gltfLoader.load( 'models/gltf/sand.glb', function ( gltf ) {
+ 				gltfLoader.load( 'models/gltf/sand.glb', function ( gltf ) {
 				island = gltf.scene;
 				island.scale.set(50, 50, 50);
 				island.position.set (0, 150, 0);
@@ -224,19 +254,19 @@
 
 				scene.add( island );
 				
-				island2 = island.clone();
+/* 				island2 = island.clone();
 				island2.position.set (600, 100, 4000);
-				scene.add (island2);
+				scene.add (island2); */
 
 				//console.log(scene.children);
 				}, undefined, function ( error ) {
 
 				console.error( error );
 
-				} ); */
+				} ); 
 
 				// add rocks
- /* 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
+ 				gltfLoader.load( 'models/gltf/sand2.glb', function ( gltf ) {
 				rocks = gltf.scene;
 				rocks.scale.set(100, 100, 100);
 				rocks.rotation.z = -0.09;
@@ -252,7 +282,7 @@
 
 				console.error( error );
 
-				} ); */
+				} ); 
  
 				// add sidewalk
 				const oGroup = new THREE.Group();
@@ -420,6 +450,37 @@
 
 				} ); 
 
+/* 				const reflectionCube = new THREE.CubeTextureLoader()
+				.setPath( 'textures/cube/SwedishRoyalCastle/' )
+				.load( [ 'px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg' ] );
+
+				gltfLoader.load( 'models/gltf/BoomBox.glb', function ( gltf ) {
+
+				const boomBox = gltf.scene;
+				boomBox.position.set( 0, 0.2, 0 );
+				boomBox.scale.set( 20, 20, 20 );
+
+				boomBox.traverse( function ( object ) {
+
+					if ( object.isMesh ) {
+
+						object.material.envMap = reflectionCube;
+						object.geometry.rotateY( - Math.PI );
+						object.castShadow = true;
+
+					}
+
+				}, undefined, function ( error ) {
+
+				console.error( error );
+
+				} );
+
+				boomBox.add( positionalAudio );
+				scene.add( boomBox );
+				
+				});
+ */
 				
 /* 				//Load Boat
 				gltfLoader.load( 'models/gltf/boat.glb', function ( gltf ) {
@@ -532,12 +593,18 @@
 
 
 			function render(parameters) {
-/* 				island.rotation.x = parameters.x;
+
+ 	/* 			island.rotation.x = parameters.x;
 				island.rotation.y = parameters.y;
 				island.rotation.z = parameters.z;
 				island.position.x = parameters.xp;
-				island.position.z = parameters.zp; */
+				island.position.z = parameters.zp;  */
 				const time = performance.now() * 0.001;
+				console.log(time);
+				if ( time > 5 && timeFlag == 0){
+					sound.play();
+					timeFlag++;
+				}
 				animCar.position.z = Math.sin(time) * 560;
 				driveMan.position.z = Math.sin(time) * 560;
 /* 				boat.position.y = Math.cos( time ) * 5;
