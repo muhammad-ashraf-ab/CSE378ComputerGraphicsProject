@@ -192,8 +192,7 @@
 				const dracoLoader = new DRACOLoader(loadingManager);
 				dracoLoader.setDecoderPath( 'js/libs/draco/gltf/' );
 
-				const listener = new THREE.AudioListener();
-				camera.add( listener );
+
 
 /* 				const audioElement = document.getElementById( 'music' );
 				audioElement.play();
@@ -207,13 +206,18 @@
 				positionalAudio.add( helper ); */
 
 				//
-				sound = new THREE.Audio(listener);
+				const listener = new THREE.AudioListener();
+				camera.add( listener );
+
+				sound = new THREE.PositionalAudio(listener);
 
 				const audioLoader = new THREE.AudioLoader();
 				audioLoader.load(('sounds/rickroll.mp3'), function (buffer) {
 				sound.setBuffer( buffer );
+				sound.setRefDistance( 150 );
 				sound.setLoop( true );
-				sound.setVolume( 0.5 );
+				sound.setVolume( 0.1 );
+
 
 				});
 
@@ -396,19 +400,20 @@
 				//Load static beetle car
 				gltfLoader.setDRACOLoader (dracoLoader);
 				gltfLoader.load( 'models/gltf/beetlecar/scene.gltf', function ( gltf ) {
-				const material = new THREE.MeshStandardMaterial({ color: 0x606060});
+				//const material = new THREE.MeshStandardMaterial({ color: 0x606060});
 				//shiba = new THREE.Mesh( geometry, material );
 				beetleCar = gltf.scene;
 				beetleCar.position.set (200, 1000, 0);
 				beetleCar.scale.set (0.4, 0.4, -0.4);
 				beetleCar.rotation.y = Math.PI/-1.5;
 				scene.add( beetleCar );
-
+				beetleCar.add(sound);
 				}, undefined, function ( error ) {
 
 				console.error( error );
 
 				} ); 
+				
 				
 				//Load moving car
 				gltfLoader.load( "models/gltf/animcar/scene.gltf", function ( gltf ) {
