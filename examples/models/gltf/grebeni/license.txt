@@ -1,0 +1,11 @@
+Model Information:
+* title:	Grebeni
+* source:	https://sketchfab.com/3d-models/grebeni-06cebc37613c4325807174d562e6a806
+* author:	antekatavic82@gmail.com (https://sketchfab.com/antekatavic82)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Grebeni" (https://sketchfab.com/3d-models/grebeni-06cebc37613c4325807174d562e6a806) by antekatavic82@gmail.com (https://sketchfab.com/antekatavic82) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

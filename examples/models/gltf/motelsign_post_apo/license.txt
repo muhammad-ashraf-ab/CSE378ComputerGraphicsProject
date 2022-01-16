@@ -1,0 +1,11 @@
+Model Information:
+* title:	Motelsign Post Apo
+* source:	https://sketchfab.com/3d-models/motelsign-post-apo-170f5144a7544fabbf203199a72e3cc8
+* author:	Thunder (https://sketchfab.com/thunderpwn)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Motelsign Post Apo" (https://sketchfab.com/3d-models/motelsign-post-apo-170f5144a7544fabbf203199a72e3cc8) by Thunder (https://sketchfab.com/thunderpwn) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
