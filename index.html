@@ -82,7 +82,7 @@
         let clickFlag = 0;
         let sundownFlag = 0;
         let container, stats;
-        let camera, scene, renderer;
+        let camera, scene, renderer, loadingManager;
         let controls, water, sun, dirLight, light, lightTarget, lightHelper;
         let geom, coneMatClip, coneMatNoClip, cone, hahaPlane, coneGeom;
 
@@ -144,7 +144,14 @@
 
 
         init();
-        animate();
+        loadingManager.onLoad = function () {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.classList.add('fade-out');
+
+            // optional: remove loader from DOM via event listener
+            loadingScreen.addEventListener('transitionend', onTransitionEnd);
+            animate();
+        }
 
         function toggleFog() {
             if (scene.fog) {
@@ -157,15 +164,7 @@
 
             window.addEventListener('click', onClickaaaa);
 
-            const loadingManager = new THREE.LoadingManager(() => {
-
-                const loadingScreen = document.getElementById('loading-screen');
-                loadingScreen.classList.add('fade-out');
-
-                // optional: remove loader from DOM via event listener
-                loadingScreen.addEventListener('transitionend', onTransitionEnd);
-
-            });
+            loadingManager = new THREE.LoadingManager();
 
             // intiate loaders
             const gltfLoader = new GLTFLoader(loadingManager);
@@ -367,12 +366,12 @@
                 });
             }
 
-            function removeCone(){
+            function removeCone() {
                 scene.remove(coneGrp);
                 scene.remove(light);
             }
 
-            function enableCone(){
+            function enableCone() {
                 scene.add(coneGrp);
                 scene.add(light);
             }
@@ -456,8 +455,9 @@
             renderer._microCache.getSet('roadgltf',
                 gltfLoader.load('examples/models/gltf/road/scene.gltf',
                     function (gltf) {
-                        road = gltf.scene;
-                        road.scale.set(20, 20, 54);
+                        road = gltf.scene,
+
+                            road.scale.set(20, 20, 54);
 
                         road.traverse(function (child) {
                             if (child.isMesh) {
@@ -950,7 +950,6 @@
 
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            console.log("I'm in your childe");
                             child.material.metalness = 0;
                             child.material.side = THREE.DoubleSide;
                             child.material.castShadow = true;
@@ -1093,7 +1092,6 @@
 
             });
 
-
             render(parameters);
             stats.update();
         }
@@ -1102,7 +1100,6 @@
 
             if (clickFlag == 0) {
                 clickFlag = 1;
-                console.log("click!");
                 sound.context.resume();
                 sound1.context.resume();
             }
