@@ -1,29 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link type="text/css" rel="stylesheet" href="main.css">
-    </head>
-        <title>CSE_378 Computer Graphics</title>
-    <body>
-        <section id="loading-screen">
 
-            <div id="loader"></div>
-        
-        </section>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <script src="./node_modules/microcache/microcache.js"></script>
+</head>
+<title>CSE_378 Computer Graphics</title>
 
-        <div id="container"></div>
-        <div id="info">
-            
-            <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - webgl ocean
-        </div>
-        <canvas id="cnvsGradient" width="300" height="50" style="position: absolute; margin: 10px; border: 1px solid aqua"/>
+<body>
+    <section id="loading-screen">
 
-        <script>
-            // https://github.com/yiwenl/glsl-fbm/blob/master/3d.glsl
-            const fbm = `
+        <div id="loader"></div>
+
+    </section>
+
+    <div id="container"></div>
+    <div id="info">
+
+        <a href="https://threejs.org" target="_blank" rel="noopener">Team 2 Proj</a> - Skimming by the all seeing eye
+    </div>
+    <canvas id="cnvsGradient" width="300" height="50"
+        style="position: absolute; margin: 10px; border: 1px solid aqua" />
+
+    <script>
+        // https://github.com/yiwenl/glsl-fbm/blob/master/3d.glsl
+        const fbm = `
             #define NUM_OCTAVES 5
         
             float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
@@ -65,706 +69,733 @@
             return v;
             }
             `;
-        </script>
-        <script type="module">
-            import * as THREE from './build/three.module.js';
-            import Stats from './examples/jsm/libs/stats.module.js';
-            import { GLTFLoader } from './examples/jsm/loaders/GLTFLoader.js';
-            import { FBXLoader } from './examples/jsm/loaders/FBXLoader.js';
-            import { DRACOLoader } from './examples/jsm/loaders/DRACOLoader.js';
-            import { GUI } from './examples/jsm/libs/lil-gui.module.min.js';
-            import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
-            import { PositionalAudioHelper } from './examples/jsm/helpers/PositionalAudioHelper.js';
-            import { Water } from './examples/jsm/objects/Water.js';
-            import { Sky } from './examples/jsm/objects/Sky.js';
+    </script>
+    <script type="module">
+        import * as THREE from './build/three.module.js';
+        import Stats from './examples/jsm/libs/stats.module.js';
+        import { GLTFLoader } from './examples/jsm/loaders/GLTFLoader.js';
+        import { FBXLoader } from './examples/jsm/loaders/FBXLoader.js';
+        import { DRACOLoader } from './examples/jsm/loaders/DRACOLoader.js';
+        import { GUI } from './examples/jsm/libs/lil-gui.module.min.js';
+        import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
+        import { PositionalAudioHelper } from './examples/jsm/helpers/PositionalAudioHelper.js';
+        import { Water } from './examples/jsm/objects/Water.js';
+        import { Sky } from './examples/jsm/objects/Sky.js';
 
-            let clickFlag = 0;
-            let sundownFlag = 0;
-            let container, stats;
-            let camera, scene, renderer;
-            let controls, water, sun, dirLight, light, lightTarget, lightHelper;
-            let geom, coneMatClip, coneMatNoClip, cone, hahaPlane, coneGeom;
+        let clickFlag = 0;
+        let sundownFlag = 0;
+        let container, stats;
+        let camera, scene, renderer;
+        let controls, water, sun, dirLight, light, lightTarget, lightHelper;
+        let geom, coneMatClip, coneMatNoClip, cone, hahaPlane, coneGeom;
 
-            //define objects
-            let island, island2;
-            let boat, girl, person, flamingo, model, dancingMan, road, road2, road3, road4, rocks, sidewalk, sidewalk2;
-            let fence, fence2, roadblock;
-            let animCar, beetleCar;
-            let field, tallGreenField, dustyPath, billBoard, motelSign, abndBuilding, diner;
-            let dinerWall, dinerWall2, dinerWall3, dinerWall4, dinerWall5, dinerWall6, dinerWall6extend, dinerWall6extend2, dinerWall6extend3, dinerWall6extend4, dinerWall7, dinerWall8;
-            let gasStation, ground3, rockyGround, dirtyGround, wall, house;
-            let coast, lighthouse;
-            
-            //fire trial
-            //let fire, fireTex, wireframeMat, wireframe;
+        //define objects
+        let island, island2;
+        let boat, girl, person, flamingo, model, dancingMan, road, road2, road3, road4, rocks, sidewalk, sidewalk2;
+        let fence, fence2, roadblock;
+        let animCar, beetleCar;
+        let field, tallGreenField, dustyPath, billBoard, motelSign, abndBuilding, diner;
+        let dinerWall, dinerWall2, dinerWall3, dinerWall4, dinerWall5, dinerWall6, dinerWall6extend, dinerWall6extend2, dinerWall6extend3, dinerWall6extend4, dinerWall7, dinerWall8;
+        let gasStation, ground3, rockyGround, dirtyGround, wall, house;
+        let coast, lighthouse;
 
-            let visualHelpPlane;
-            let coneGrp = new THREE.Group();
-            //CLIPPING DEFINE
-            let clipMaterial;
-            let nzPlane, specialpzPlane, pzPlane, nxPlane, pxPlane, nyPlane, pyPlane;
-            let dinerpzPlane, dinernxPlane, dinernzPlane, roadnxPlane;
+        //fire trial
+        //let fire, fireTex, wireframeMat, wireframe;
 
-            //SHADING DEFINE
-            let shadeMaterial;
+        let visualHelpPlane;
+        let coneGrp = new THREE.Group();
+        //CLIPPING DEFINE
+        let clipMaterial;
+        let nzPlane, specialpzPlane, pzPlane, nxPlane, pxPlane, nyPlane, pyPlane;
+        let dinerpzPlane, dinernxPlane, dinernzPlane, roadnxPlane;
+
+        //SHADING DEFINE
+        let shadeMaterial;
 
 
-            //cloudss
-            let cloudGroup = new THREE.Group;
+        //cloudss
+        let cloudGroup = new THREE.Group;
 
-            let cloudParticles = [];
-            //define mixers
-            let mixer, mixer1, mixer2, mixer3;
+        let cloudParticles = [];
+        //define mixers
+        let mixer, mixer1, mixer2, mixer3;
 
-            let switchF = 0;
-            let prevTime = Date.now();
-            const clock = new THREE.Clock();
+        let switchF = 0;
+        let prevTime = Date.now();
+        const clock = new THREE.Clock();
 
-            const parameters = {
-                    elevation: 3,
-                    azimuth: 180,
-                    x: 0,
-                    y: Math.PI/2,
-                    z: 0, 
-                    xp: -3400,
-                    zp: -2360,
-                    yp: 500,
-                    pzConstant: -386,
-                    nxConstant: 3418,
-                    nzConstant: 2121,
-                    fog: 30,
-                    fogBool: false,
-                };
-            
-            //define sound
-            let sound, sound1;
-            let timeFlag = 0;
-            let smokeMaterial, particle, testPlane, smokeParticles = [];
-        
+        const parameters = {
+            elevation: 3,
+            azimuth: 180,
+            x: 0,
+            y: Math.PI / 2,
+            z: 0,
+            xp: -3400,
+            zp: -2360,
+            yp: 500,
+            pzConstant: -386,
+            nxConstant: 3418,
+            nzConstant: 2121,
+            fog: 30,
+            fogBool: false,
+        };
 
-            init();
-            animate();
+        //define sound
+        let sound, sound1;
+        let timeFlag = 0;
+        let smokeMaterial, particle, testPlane, smokeParticles = [];
 
-            function toggleFog(){
-                if(scene.fog){
-                    scene.fog = null
-                }else{
-                    scene.fog = new THREE.Fog( 0x77777f, 3500, 4500 );
-                }
+
+        init();
+        animate();
+
+        function toggleFog() {
+            if (scene.fog) {
+                scene.fog = null
+            } else {
+                scene.fog = new THREE.Fog(0x77777f, 3500, 4500);
             }
-            function init() {
-                
-                window.addEventListener('click', onClickaaaa);
+        }
+        function init() {
 
-                const loadingManager = new THREE.LoadingManager( () => {
+            window.addEventListener('click', onClickaaaa);
 
-                const loadingScreen = document.getElementById( 'loading-screen' );
-                loadingScreen.classList.add( 'fade-out' );
+            const loadingManager = new THREE.LoadingManager(() => {
+
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.classList.add('fade-out');
 
                 // optional: remove loader from DOM via event listener
-                loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
+                loadingScreen.addEventListener('transitionend', onTransitionEnd);
 
-                } );
+            });
 
-                // intiate loaders
-                const gltfLoader = new GLTFLoader(loadingManager);
-                const fbxLoader = new FBXLoader(loadingManager);
-                const dracoLoader = new DRACOLoader(loadingManager);
-                const textureLoader = new THREE.TextureLoader(loadingManager);
-                dracoLoader.setDecoderPath( 'js/libs/draco/gltf/' );
-                textureLoader.crossOrigin = '';
-                
-                container = document.getElementById( 'container' );
+            // intiate loaders
+            const gltfLoader = new GLTFLoader(loadingManager);
+            const fbxLoader = new FBXLoader(loadingManager);
+            const dracoLoader = new DRACOLoader(loadingManager);
+            const textureLoader = new THREE.TextureLoader(loadingManager);
+            dracoLoader.setDecoderPath('js/libs/draco/gltf/');
+            textureLoader.crossOrigin = '';
 
-                //
+            container = document.getElementById('container');
 
-                renderer = new THREE.WebGLRenderer();
-                renderer.setPixelRatio( window.devicePixelRatio );
-                renderer.setSize( window.innerWidth, window.innerHeight );
-                renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                // ENABLING CLIPPING FOR RENDERER
-                renderer.localClippingEnabled = true;
-                document.body.appendChild(renderer.domElement);
-            
+            //
 
-                //
+            renderer = new THREE.WebGLRenderer();
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            // ENABLING CLIPPING FOR RENDERER
+            renderer.localClippingEnabled = true;
+            document.body.appendChild(renderer.domElement);
 
-                scene = new THREE.Scene();
-                //scene.fog = new THREE.Fog( 0x77777f, 3500, 4500 );
-                
-                //scene.background = new THREE.Color( 0x444466 );
-                
-                //renderer.setClearColor(scene.fog.color);
-                camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 1, 20000 );
-                camera.position.set( 2000, 900, 2000 );
+            // initiate microcache
+            renderer._microCache = new MicroCache();
 
-                //
+            //
 
-                sun = new THREE.Vector3();
+            scene = new THREE.Scene();
+            //scene.fog = new THREE.Fog( 0x77777f, 3500, 4500 );
+
+            //scene.background = new THREE.Color( 0x444466 );
+
+            //renderer.setClearColor(scene.fog.color);
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 20000);
+            camera.position.set(2000, 900, 2000);
+
+            //
+
+            sun = new THREE.Vector3();
 
 
-                //TESTING CLIPPING
-                nzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), 5000 );
-                pzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, -1 ), 5000 );
-                specialpzPlane = new THREE.Plane( new THREE.Vector3(0, 0, -1), 5000+15);
-                nxPlane = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 5000 );
-                pxPlane = new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 5000 );
+            //TESTING CLIPPING
+            nzPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 5000);
+            pzPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 5000);
+            specialpzPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 5000 + 15);
+            nxPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 5000);
+            pxPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 5000);
 
-                // Water
+            // Water
 
-                const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+            const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 
-                water = new Water(
-                    waterGeometry,
-                    {
-                        textureWidth: 512,
-                        textureHeight: 512,
-                        waterNormals: new THREE.TextureLoader().load( 'examples/textures/waternormals.jpg', function ( texture ) {
+            water = new Water(
+                waterGeometry,
+                {
+                    textureWidth: 512,
+                    textureHeight: 512,
+                    waterNormals: new THREE.TextureLoader().load('examples/textures/waternormals.jpg', function (texture) {
 
-                            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-                        } ),
-                        sunDirection: new THREE.Vector3(),
-                        sunColor: 0xffffff,
-                        waterColor: 0x001e0f,
-                        distortionScale: 3.7,
-                        fog: scene.fog !== undefined
-                    }
-                );
+                    }),
+                    sunDirection: new THREE.Vector3(),
+                    sunColor: 0xffffff,
+                    waterColor: 0x001e0f,
+                    distortionScale: 3.7,
+                    fog: scene.fog !== undefined
+                }
+            );
 
-                water.rotation.x = - Math.PI / 2;
+            water.rotation.x = - Math.PI / 2;
 
-                scene.add( water );
+            scene.add(water);
 
+            renderer._microCache.getSet('whiteCloudTexture',
                 textureLoader.load(
-                "examples/textures/whiteCloud.png",
-                function onLoad(texture) {
-                    const smokeGeo = new THREE.PlaneBufferGeometry(300, 300);
+                    "examples/textures/whiteCloud.png",
+                    function onLoad(texture) {
+                        const smokeGeo = new THREE.PlaneBufferGeometry(300, 300);
 
-                    smokeMaterial = new THREE.MeshLambertMaterial({
-                        clippingPlanes: [nzPlane, pzPlane, nxPlane, pxPlane],
-                        map: texture,
-                        transparent: true
-                    });
+                        smokeMaterial = new THREE.MeshLambertMaterial({
+                            clippingPlanes: [nzPlane, pzPlane, nxPlane, pxPlane],
+                            map: texture,
+                            transparent: true
+                        });
 
-                    for(var oxpos = -5000; oxpos< 5000; oxpos+= (1000)){
-                        for(var ozpos = -5000; ozpos < 5000; ozpos += (1000)){
-                            let nxpos = oxpos + 800 *Math.random();
-                            let nzpos = ozpos + 800 *Math.random();
-                            for (let p = 0, l = 20; p < l; p++) {
-                                particle = new THREE.Mesh(smokeGeo, smokeMaterial);
-                                
-                                particle.rotation.z = Math.random() * 360;
+                        for (var oxpos = -5000; oxpos < 5000; oxpos += (1000)) {
+                            for (var ozpos = -5000; ozpos < 5000; ozpos += (1000)) {
+                                let nxpos = oxpos + 800 * Math.random();
+                                let nzpos = ozpos + 800 * Math.random();
+                                for (let p = 0, l = 20; p < l; p++) {
+                                    particle = new THREE.Mesh(smokeGeo, smokeMaterial);
 
-                                const testGeo = new THREE.PlaneBufferGeometry(1, 1);
-                                const testMat = new THREE.MeshLambertMaterial({
-                                    opacity: 0,
-                                    transparent: true
-                                });
-                                testPlane = new THREE.Mesh (testGeo, testMat);
-                                testPlane.add(particle);
-                                
-                                testPlane.position.set(
-                                    Math.random() * 400 + nxpos,
-                                    Math.random() * 600 + 3500,
-                                    Math.random() * 1000 + nzpos
-                    
-                                );
+                                    particle.rotation.z = Math.random() * 360;
 
-                                scene.add(testPlane);
-                                smokeParticles.push(testPlane);
+                                    const testGeo = new THREE.PlaneBufferGeometry(1, 1);
+                                    const testMat = new THREE.MeshLambertMaterial({
+                                        opacity: 0,
+                                        transparent: true
+                                    });
+                                    testPlane = new THREE.Mesh(testGeo, testMat);
+                                    testPlane.add(particle);
+
+                                    testPlane.position.set(
+                                        Math.random() * 400 + nxpos,
+                                        Math.random() * 600 + 3500,
+                                        Math.random() * 1000 + nzpos
+
+                                    );
+
+                                    scene.add(testPlane);
+                                    smokeParticles.push(testPlane);
+                                }
                             }
                         }
-                    }
+                    })
+            );
+
+            const sky = new Sky();
+            sky.scale.setScalar(10000);
+            scene.add(sky);
+
+            const skyUniforms = sky.material.uniforms;
+
+            skyUniforms['turbidity'].value = 10;
+            skyUniforms['rayleigh'].value = 1.5;
+            skyUniforms['mieCoefficient'].value = 0.005;
+            skyUniforms['mieDirectionalG'].value = 0.8;
+
+            //light house light
+            light = new THREE.SpotLight(0xffff00, 10, 0, 0.2, 1);
+            light.position.set(3493, 350, -588);
+            light.castShadow = true;
+            light.shadowMapVisible = true;
+
+            lightTarget = new THREE.Object3D()
+            lightTarget.position.set(1000, 0, -200)
+            scene.add(lightTarget)
+            light.target = lightTarget
+            scene.add(light);
+
+            coneGeom = new THREE.ConeGeometry(65, 40 * 14, 32,);
+            geom = new THREE.PlaneGeometry(40, 40);
+            coneMatNoClip = new THREE.MeshBasicMaterial({ color: 0xffff00, clippingPlanes: [pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide, fog: true, transparent: true });
+            coneMatClip = new THREE.MeshBasicMaterial({ color: 0xffff00, clippingPlanes: [pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide, fog: false, transparent: true });
+            cone = new THREE.Mesh(coneGeom, coneMatNoClip);
+            hahaPlane = new THREE.Mesh(geom, coneMatNoClip);
+            hahaPlane.rotation.z = -Math.PI / 2
+            cone.rotation.z = -Math.PI / 2;
+            cone.rotation.y = Math.PI / 2;
+            hahaPlane.position.x -= 400;
+            cone.scale.set(20, 20, 20);
+            hahaPlane.scale.set(20, 20, 20);
+            cone.position.z += 400 * 14;
+
+            coneGrp.add(cone);
+            coneGrp.position.set(3491, 347, -588);
+            scene.add(coneGrp)
+
+            // add directional light to scene
+            dirLight = new THREE.DirectionalLight(0xffffff, 2);
+
+            dirLight.position.set(- 12, 1809, 1);
+            scene.add(dirLight);
+            dirLight.target.position.set(0, 1809, 0);
+            scene.add(dirLight.target);
+
+            dirLight.castShadow = true;
+
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+
+            const d = 50;
+
+            dirLight.shadow.camera.left = - d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = - d;
+
+            dirLight.shadow.camera.far = 3500;
+            dirLight.shadow.bias = - 0.0001;
+
+            const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 10);
+            // scene.add( dirLightHelper );
+
+            // add ambient light to scene
+            let ambLighting = new THREE.AmbientLight(0xFFFFFF, 0.5);
+            scene.add(ambLighting);
+
+            const pmremGenerator = new THREE.PMREMGenerator(renderer);
+            // ADD OR REMOVE CLOUDS
+            function removeClouds() {
+                [].forEach.call(smokeParticles, sp => {
+                    scene.remove(sp)
                 });
-                
+            }
+            function enableClouds() {
+                [].forEach.call(smokeParticles, sp => {
+                    scene.add(sp)
+                });
+            }
 
-                const sky = new Sky();
-                sky.scale.setScalar( 10000 );
-                scene.add( sky );
+            function updateSun() {
 
-                const skyUniforms = sky.material.uniforms;
-
-                skyUniforms[ 'turbidity' ].value = 10;
-                skyUniforms[ 'rayleigh' ].value = 1.5;
-                skyUniforms[ 'mieCoefficient' ].value = 0.005;
-                skyUniforms[ 'mieDirectionalG' ].value = 0.8;
-                
-                //light house light
-                light = new THREE.SpotLight(0xffff00, 10, 0, 0.2, 1);
-                light.position.set (3493, 350, -588);
-                light.castShadow = true; 
-                light.shadowMapVisible = true;
-                
-                lightTarget = new THREE.Object3D()
-                lightTarget.position.set(1000, 0, -200)
-                scene.add(lightTarget)
-                light.target = lightTarget
-                scene.add(light);
-
-                coneGeom = new THREE.ConeGeometry( 65, 40*14, 32,  );
-                geom = new THREE.PlaneGeometry( 40, 40 );
-                coneMatNoClip = new THREE.MeshBasicMaterial( {color: 0xffff00,clippingPlanes: [pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide,fog: true, transparent: true} );
-                coneMatClip = new THREE.MeshBasicMaterial( {color: 0xffff00,clippingPlanes: [ pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide,fog: false, transparent: true} );
-                cone = new THREE.Mesh( coneGeom, coneMatNoClip );
-                hahaPlane = new THREE.Mesh( geom, coneMatNoClip);
-                hahaPlane.rotation.z = -Math.PI/2
-                cone.rotation.z = -Math.PI/2;
-                cone.rotation.y = Math.PI/2;
-                hahaPlane.position.x -= 400;
-                cone.scale.set (20, 20, 20);
-                hahaPlane.scale.set(20, 20, 20);
-                cone.position.z += 400*14;
-            
-                coneGrp.add(cone);
-                coneGrp.position.set (3491, 347, -588);
-                scene.add(coneGrp)
-
-                // add directional light to scene
-                dirLight = new THREE.DirectionalLight( 0xffffff, 2 );
-        
-                dirLight.position.set( - 12, 1809, 1 );
-                scene.add( dirLight );
-                dirLight.target.position.set(0, 1809, 0);
-                scene.add(dirLight.target);
-
-                dirLight.castShadow = true;
-
-                dirLight.shadow.mapSize.width = 2048;
-                dirLight.shadow.mapSize.height = 2048;
-
-                const d = 50;
-
-                dirLight.shadow.camera.left = - d;
-                dirLight.shadow.camera.right = d;
-                dirLight.shadow.camera.top = d;
-                dirLight.shadow.camera.bottom = - d;
-
-                dirLight.shadow.camera.far = 3500;
-                dirLight.shadow.bias = - 0.0001;
-
-                const dirLightHelper = new THREE.DirectionalLightHelper( dirLight, 10 );
-                // scene.add( dirLightHelper );
-
-                // add ambient light to scene
-                let ambLighting = new THREE.AmbientLight(0xFFFFFF, 0.5 );
-                scene.add(ambLighting); 
-
-                const pmremGenerator = new THREE.PMREMGenerator( renderer );
-                // ADD OR REMOVE CLOUDS
-                function removeClouds(){
-                    [].forEach.call(smokeParticles, sp => {
-                        scene.remove(sp)
-                    });
-                }
-                function enableClouds(){
-                    [].forEach.call(smokeParticles, sp => {
-                        scene.add(sp)
-                    });
+                const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+                const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+                if (parameters.elevation < 3.5 && sundownFlag == 0) {
+                    sundownFlag = 1
+                    removeClouds()
+                } else if (parameters.elevation > 3.5 && sundownFlag == 1) {
+                    sundownFlag = 0
+                    enableClouds()
                 }
 
-                function updateSun() {
+                sun.setFromSphericalCoords(1, phi, theta);
 
-                    const phi = THREE.MathUtils.degToRad( 90 - parameters.elevation );
-                    const theta = THREE.MathUtils.degToRad( parameters.azimuth );
-                    if (parameters.elevation < 3.5 && sundownFlag == 0){
-                        sundownFlag = 1
-                        removeClouds()
-                    }else if(parameters.elevation > 3.5 && sundownFlag == 1){
-                        sundownFlag = 0
-                        enableClouds()
-                    }
+                sky.material.uniforms['sunPosition'].value.copy(sun);
+                water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+                const radius = 5000;
+                const sinPhiRadius = Math.sin(phi) * radius;
 
-                    sun.setFromSphericalCoords( 1, phi, theta );
+                let lightX = sinPhiRadius * Math.sin(theta);
+                let lightY = Math.cos(phi) * radius;
+                let lightZ = sinPhiRadius * Math.cos(theta);
 
-                    sky.material.uniforms[ 'sunPosition' ].value.copy( sun );
-                    water.material.uniforms[ 'sunDirection' ].value.copy( sun ).normalize();
-                    const radius = 5000;
-                    const sinPhiRadius = Math.sin( phi ) * radius;
+                dirLight.position.set(lightX, lightY, lightZ);
 
-                    let lightX = sinPhiRadius * Math.sin( theta );
-                    let lightY = Math.cos( phi ) * radius;
-                    let lightZ = sinPhiRadius * Math.cos( theta ); 
+                scene.environment = pmremGenerator.fromScene(sky).texture;
 
-                    dirLight.position.set ( lightX, lightY, lightZ);
+            }
 
-                    scene.environment = pmremGenerator.fromScene( sky ).texture;
-                    
-                }
+            updateSun();
 
-                updateSun();
-            
 
-                //
-                const audioLoader = new THREE.AudioLoader();
-                const listener = new THREE.AudioListener();
-                camera.add( listener );
+            //
+            const audioLoader = new THREE.AudioLoader();
+            const listener = new THREE.AudioListener();
+            camera.add(listener);
 
-                sound = new THREE.PositionalAudio(listener);
-                sound1 = new THREE.PositionalAudio(listener);
+            sound = new THREE.PositionalAudio(listener);
+            sound1 = new THREE.PositionalAudio(listener);
 
+            renderer._microCache.getSet('rickrollmp3',
                 audioLoader.load(('examples/sounds/rickroll.mp3'), function (buffer) {
-                sound.setBuffer( buffer );
-                sound.setRefDistance( 150 );
-                sound.setLoop( true );
-                sound.setVolume( 0.1 );
+                    sound.setBuffer(buffer);
+                    sound.setRefDistance(150);
+                    sound.setLoop(true);
+                    sound.setVolume(0.4);
 
 
-                });
-
-                audioLoader.load(('examples/sounds/flamingo.mp3'), function (buffer) {
-                sound1.setBuffer( buffer );
-                sound1.setRefDistance( 150 );
-                sound1.setLoop( true );
-                sound1.setVolume( 0.9 );
-
-
-                });
-                
-                
-
-                clipMaterial = new THREE.MeshNormalMaterial({
-                    clippingPlanes: [pzPlane, nzPlane, pxPlane, nzPlane],
-                    clipShadows: true,
-                    side: THREE.DoubleSide
                 })
+            );
 
-                const roadGroup = new THREE.Group();
-                const roadGroup2 = new THREE.Group();
-                // const cloudGroup = new THREE.Group();
-
-                // add road
-                gltfLoader.load( 'examples/models/gltf/road/scene.gltf', 
-                function ( gltf ) {
-                road = gltf.scene;
-                road.scale.set(20, 20, 54);
-                
-                road.traverse( function ( child ) {
-                if ( child.isMesh ) {
-
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    
-                    child.material.clippingPlanes = [ pzPlane, specialpzPlane, pxPlane, nzPlane ],
-                    child.material.clipShadows = true,
-                    child.material.side = THREE.DoubleSide
-                }
-                });
-
-                road2 = road.clone();
-                road2.position.x += 120;
-
-                roadGroup.add(road);
-                roadGroup.add(road2)
-                roadGroup.position.set(-1070-120, 190-13, -5000);
-
-                let sgrps = [];
-                let crntpos = roadGroup.position.z;
-                for (var i = 0; i < 16; i++){
-                    sgrps[i] = roadGroup.clone();
-                    sgrps[i].position.z = crntpos;
-                    scene.add(sgrps[i]);
-                    crntpos += 650-3;
-                }  
-
-                }, undefined, function ( error ) {
-
-                console.error( error );
-                } );
+            renderer._microCache.getSet('flamingomp3',
+                audioLoader.load(('examples/sounds/flamingo.mp3'), function (buffer) {
+                    sound1.setBuffer(buffer);
+                    sound1.setRefDistance(150);
+                    sound1.setLoop(true);
+                    sound1.setVolume(0.5);
 
 
-                // add horizontal road
-                gltfLoader.load( 'examples/models/gltf/road/scene.gltf', 
-                function ( gltf ) {
-                road3 = gltf.scene;
-                road3.scale.set(20, 20, 54);
-                road3.rotation.y = Math.PI/2;
-                
-                road3.traverse( function ( child ) {
-                if ( child.isMesh ) {
-
-                    child.castShadow = true;
-                    child.receiveShadow = true;		
-                    child.material.clippingPlanes = [ roadnxPlane, pzPlane, specialpzPlane, nxPlane, nzPlane ],
-                    child.material.clipShadows = true,
-                    child.material.side = THREE.DoubleSide
-                }
-                });
-
-                road4 = road3.clone();
-                road4.position.z += 120;
-
-                roadGroup2.add(road3);
-                roadGroup2.add(road4)
-                roadGroup2.position.set (-5000, 175, -2300);
-                
-                let sgrps = [];
-                let crntpos = roadGroup2.position.x;
-                for (var i = 0; i < 7; i++){
-                    sgrps[i] = roadGroup2.clone();
-                    sgrps[i].position.x = crntpos;
-                    scene.add(sgrps[i]);
-                    crntpos += 650-3;
-                }  
-
-                }, undefined, function ( error ) {
-
-                console.error( error );
-                } );
-
-                // //Load fire
-                // fireTex = textureLoader.load ("textures/Fire.png");
-
-                // wireframeMat = new THREE.MeshBasicMaterial({
-                // 	color : new THREE.Color(0xffffff),
-                // 	wireframe : true
-                // });
-
-                // fire = new Fire(fireTex);
-
-                // wireframe = new THREE.Mesh(fire.geometry, wireframeMat.clone());
-                // fire.add(wireframe);
-                // wireframe.visible = true;
-                // wireframe.visible = false;
-
-                // fire.position.set ( 100, 1000, 100);
-                // scene.add (fire);
-
-                
-                //Load static beetle car
-                gltfLoader.setDRACOLoader (dracoLoader);
-                gltfLoader.load( 'examples/models/gltf/beetlecar/scene.gltf', function ( gltf ) {
-                beetleCar = gltf.scene;
-                beetleCar.position.set (-1570, 165, -3167);
-                beetleCar.scale.set (0.5, 0.5, 0.5);
-                beetleCar.rotation.y = Math.PI/1.5;
-                scene.add( beetleCar );
-                beetleCar.add(sound);
-                }, undefined, function ( error ) {
-
-                console.error( error );
-
-                } ); 
-                
-                //Load moving car
-                gltfLoader.load( "examples/models/gltf/animcar/scene.gltf", function ( gltf ) {
-                animCar = gltf.scene;
-                animCar = gltf.scene.children[ 0 ];
-                animCar.scale.set( 0.3, 0.3, 0.3 );
-                animCar.position.set (-1190, 180, -5000);
-                animCar.rotation.x = 4.694
-                
-                animCar.traverse( function ( child ) {
-                if ( child.isMesh ) {
-
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    
-                    child.material.clippingPlanes = [ pzPlane, pzPlane, pxPlane, nzPlane ],
-                    child.material.clipShadows = true,
-                    child.material.side = THREE.DoubleSide
-                    }
-                });
-
-                scene.add( animCar );
-                mixer3 = new THREE.AnimationMixer( animCar );
-                mixer3.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
-
-                } ); 
-
-                //Load dusty path
-                gltfLoader.load( "examples/models/gltf/dusty_path_in_the_fields/scene.gltf", function ( gltf ) {
-                dustyPath = gltf.scene;
-                dustyPath.scale.set( 0.5, 0.5, 0.5 );
-                dustyPath.position.set (-1938+135, 180, -341-260);
-                scene.add( dustyPath );
-
-                var dustyPath2 = dustyPath.clone();
-                dustyPath2.position.set(-1938+135, 180, -2100-260);
-                dustyPath2.scale.set(dustyPath2.scale.x*1, dustyPath2.scale.y*1, dustyPath2.scale.z*-1);
-                scene.add(dustyPath2);
-                } );
-
-                //Load truck billboard
-                gltfLoader.load( "examples/models/gltf/billboard_post_apo/scene.gltf", function ( gltf ) {
-                billBoard = gltf.scene;
-                billBoard.scale.set( 0.8, 0.8, 0.8 );
-                billBoard.rotation.y = 1.53588974175501;
-                billBoard.position.set (-1500, 167, -1324);
-                scene.add( billBoard );
-                } );
+                })
+            );
 
 
-                //Load motel sign
-                gltfLoader.load( "examples/models/gltf/motelsign_post_apo/scene.gltf", function ( gltf ) {
-                motelSign = gltf.scene;
-                motelSign.scale.set( 0.2, 0.2, 0.2);
-                motelSign.rotation.y = 0.837758040957278;
-                motelSign.position.set (-2307+195, 140, 400-260);
-                scene.add( motelSign );
-                } );
+            clipMaterial = new THREE.MeshNormalMaterial({
+                clippingPlanes: [pzPlane, nzPlane, pxPlane, nzPlane],
+                clipShadows: true,
+                side: THREE.DoubleSide
+            })
 
-                //Load abndoned building 
-                gltfLoader.load( "examples/models/gltf/abandon_building/scene.gltf", function ( gltf ) {
-                abndBuilding = gltf.scene;
-                abndBuilding.scale.set( 0.2, 0.2, 0.2 );
-                abndBuilding.rotation.y = 3.15904594610974;
-                abndBuilding.position.set (-2430+195, 151, 0-260);
-                scene.add( abndBuilding );
-                } );
+            const roadGroup = new THREE.Group();
+            const roadGroup2 = new THREE.Group();
+            // const cloudGroup = new THREE.Group();
 
-                //Load lighhouse 
-                gltfLoader.load( "examples/models/gltf/grebeni/scene.gltf", function ( gltf ) {
-                lighthouse = gltf.scene;
-                lighthouse.scale.set( 1600, 1600, 1600);
-                lighthouse.rotation.y = 1.0471975511966;
-                lighthouse.position.set (3903, 666, -521);
-                scene.add( lighthouse );
-                } );
-                
-                //TESTING CLIPPING
-                dinerpzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, -1 ), -386 );
-                dinernxPlane = new THREE.Plane( new THREE.Vector3( 1, 0, 0  ), 3418 );
-                dinernzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1  ), 2121 );
-                
-                roadnxPlane = new THREE.Plane( new THREE.Vector3( -1, 0, 0  ), -1218 );
+            // add road
+            renderer._microCache.getSet('roadgltf',
+                gltfLoader.load('examples/models/gltf/road/scene.gltf',
+                    function (gltf) {
+                        road = gltf.scene;
+                        road.scale.set(20, 20, 54);
 
-                //Load diner
-                gltfLoader.load( "examples/models/gltf/restro/scene.gltf", function ( gltf ) {
-                diner = gltf.scene;
-                diner.scale.set( 0.9, 0.9, 0.9 );
-                diner.rotation.y = 1.56;
-                diner.position.set (-2250, 151, -95);
-                diner.traverse( function ( child ) {
-                    if ( child.isMesh ) {
-
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        child.material.clippingPlanes = [ dinerpzPlane, dinernxPlane, dinernzPlane ],
-                        child.material.opacity = 1;
-                        child.material.side = THREE.DoubleSide
-
-                    }
-            
-                });
-                scene.add( diner );
-
-                } );
-
-                //Load gas station
-                gltfLoader.load( "examples/models/gltf/gas_station_ussr/scene.gltf", function ( gltf ) {
-                gasStation = gltf.scene;
-                gasStation.scale.set( 7, 7, 7 );
-                gasStation.rotation.y = 3.15904594610974;
-                gasStation.position.set (-2184, 268, -3044);
-                scene.add( gasStation );
-
-                } );
-
-                // new THREE.Plane( new THREE.Vector3( 1, 0, 0  ), 3570 )
-
-                //Load walls to surround diner/abandoned building/gas station
-                gltfLoader.load( "examples/models/gltf/mossy_stone_wall/scene.gltf", function ( gltf ) {
-                        dinerWall = gltf.scene;
-                        dinerWall.scale.set( 1.7, 1.7, 1.7 );
-                        dinerWall.traverse( function ( child ) {
-                            if ( child.isMesh ) {
+                        road.traverse(function (child) {
+                            if (child.isMesh) {
 
                                 child.castShadow = true;
                                 child.receiveShadow = true;
-                                
-                                child.material.clippingPlanes = [ pzPlane, specialpzPlane, pxPlane, nzPlane ],
-                                child.material.clipShadows = true,
-                                child.material.side = THREE.DoubleSide
 
+                                child.material.clippingPlanes = [pzPlane, specialpzPlane, pxPlane, nzPlane],
+                                    child.material.clipShadows = true,
+                                    child.material.side = THREE.DoubleSide
                             }
-                        
-                        
-                    });
-                        dinerWall.position.set(-2189, -3, 520);
-                        dinerWall2 = dinerWall.clone();
-                        dinerWall2.rotation.y = Math.PI/2;
-                        dinerWall2.position.set(-2460, -3, 28);
-
-                        dinerWall4 = dinerWall.clone();
-                        dinerWall4.rotation.y = Math.PI/2;
-                        dinerWall4.position.set(-3420, -3, -900+140)
-
-                        dinerWall5 = dinerWall4.clone();
-                        dinerWall5.position.z = -1210;
-                        dinerWall5.traverse( function ( child ) {
-                            if ( child.isMesh ) {
-
-                                child.castShadow = true;
-                                child.receiveShadow = true;
-                                
-                                child.material.clippingPlanes = [ dinernzPlane,  pzPlane, specialpzPlane, pxPlane, nzPlane ],
-                                child.material.clipShadows = true,
-                                child.material.side = THREE.DoubleSide
-
-                            }
-
                         });
-                        scene.add(dinerWall);
-                        scene.add(dinerWall2);
-                        scene.add(dinerWall4);
-                        scene.add(dinerWall5);
-                        
-                });
-                gltfLoader.load( "examples/models/gltf/mossy_stone_wall/scene.gltf", function ( gltf ) {
-                    dinerWall3 = gltf.scene;
-                dinerWall3.scale.set( 1.7, 1.7, 1.7 );
-                dinerWall3.position.set(-3460, -3, -250);
-                dinerWall3.traverse( function ( child ) {
-                    if ( child.isMesh ) {
 
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        
-                        child.material.clippingPlanes = [  new THREE.Plane( new THREE.Vector3( 1, 0, 0  ), 3520 ) ],
-                        child.material.clipShadows = true,
-                        child.material.side = THREE.DoubleSide
+                        road2 = road.clone();
+                        road2.position.x += 120;
 
-                    }
-            
-                });
-                scene.add(dinerWall3)
-                }, undefined, function ( error ) {
+                        roadGroup.add(road);
+                        roadGroup.add(road2)
+                        roadGroup.position.set(-1070 - 120, 190 - 13, -5000);
 
-                console.error( error );
-                } );
+                        let sgrps = [];
+                        let crntpos = roadGroup.position.z;
+                        for (var i = 0; i < 16; i++) {
+                            sgrps[i] = roadGroup.clone();
+                            sgrps[i].position.z = crntpos;
+                            scene.add(sgrps[i]);
+                            crntpos += 650 - 3;
+                        }
 
-                //Load walls to surround diner/abandoned building/gas station
-                gltfLoader.load( "examples/models/gltf/mossy_stone_wall/scene.gltf", function ( gltf ) {
-                        dinerWall6 = gltf.scene;
-                        dinerWall6.scale.set( 1.7, 1.7, 1.7 );
-                        dinerWall6.traverse( function ( child ) {
-                            if ( child.isMesh ) {
+                    }, undefined, function (error) {
+
+                        console.error(error);
+                    })
+            );
+
+
+            // add horizontal road
+            renderer._microCache.getSet('roadgltf',
+                gltfLoader.load('examples/models/gltf/road/scene.gltf',
+                    function (gltf) {
+                        road3 = gltf.scene;
+                        road3.scale.set(20, 20, 54);
+                        road3.rotation.y = Math.PI / 2;
+
+                        road3.traverse(function (child) {
+                            if (child.isMesh) {
 
                                 child.castShadow = true;
                                 child.receiveShadow = true;
-                                
-                                child.material.clippingPlanes = [ pzPlane, specialpzPlane, nxPlane, nzPlane, pxPlane ],
+                                child.material.clippingPlanes = [roadnxPlane, pzPlane, specialpzPlane, nxPlane, nzPlane],
+                                    child.material.clipShadows = true,
+                                    child.material.side = THREE.DoubleSide
+                            }
+                        });
+
+                        road4 = road3.clone();
+                        road4.position.z += 120;
+
+                        roadGroup2.add(road3);
+                        roadGroup2.add(road4)
+                        roadGroup2.position.set(-5000, 175, -2300);
+
+                        let sgrps = [];
+                        let crntpos = roadGroup2.position.x;
+                        for (var i = 0; i < 7; i++) {
+                            sgrps[i] = roadGroup2.clone();
+                            sgrps[i].position.x = crntpos;
+                            scene.add(sgrps[i]);
+                            crntpos += 650 - 3;
+                        }
+
+                    }, undefined, function (error) {
+
+                        console.error(error);
+                    })
+            );
+
+            // //Load fire
+            // fireTex = textureLoader.load ("textures/Fire.png");
+
+            // wireframeMat = new THREE.MeshBasicMaterial({
+            // 	color : new THREE.Color(0xffffff),
+            // 	wireframe : true
+            // });
+
+            // fire = new Fire(fireTex);
+
+            // wireframe = new THREE.Mesh(fire.geometry, wireframeMat.clone());
+            // fire.add(wireframe);
+            // wireframe.visible = true;
+            // wireframe.visible = false;
+
+            // fire.position.set ( 100, 1000, 100);
+            // scene.add (fire);
+
+
+            //Load static beetle car
+            gltfLoader.setDRACOLoader(dracoLoader);
+            renderer._microCache.getSet('beetlecargltf',
+                gltfLoader.load('examples/models/gltf/beetlecar/scene.gltf', function (gltf) {
+                    beetleCar = gltf.scene;
+                    beetleCar.position.set(-1570, 165, -3167);
+                    beetleCar.scale.set(0.5, 0.5, 0.5);
+                    beetleCar.rotation.y = Math.PI / 1.5;
+                    scene.add(beetleCar);
+                    beetleCar.add(sound);
+                }, undefined, function (error) {
+
+                    console.error(error);
+
+                })
+            );
+
+            //Load moving car
+            renderer._microCache.getSet('animcargltf',
+                gltfLoader.load("examples/models/gltf/animcar/scene.gltf", function (gltf) {
+                    animCar = gltf.scene;
+                    animCar = gltf.scene.children[0];
+                    animCar.scale.set(0.3, 0.3, 0.3);
+                    animCar.position.set(-1190, 180, -5000);
+                    animCar.rotation.x = 4.694
+
+                    animCar.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [pzPlane, pzPlane, pxPlane, nzPlane],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+                        }
+                    });
+
+                    scene.add(animCar);
+                    mixer3 = new THREE.AnimationMixer(animCar);
+                    mixer3.clipAction(gltf.animations[0]).setDuration(1).play();
+
+                })
+            );
+
+            //Load dusty path
+            renderer._microCache.getSet('dusty_path_in_the_fields_gltf',
+                gltfLoader.load("examples/models/gltf/dusty_path_in_the_fields/scene.gltf", function (gltf) {
+                    dustyPath = gltf.scene;
+                    dustyPath.scale.set(0.5, 0.5, 0.5);
+                    dustyPath.position.set(-1938 + 135, 180, -341 - 260);
+                    scene.add(dustyPath);
+
+                    var dustyPath2 = dustyPath.clone();
+                    dustyPath2.position.set(-1938 + 135, 180, -2100 - 260);
+                    dustyPath2.scale.set(dustyPath2.scale.x * 1, dustyPath2.scale.y * 1, dustyPath2.scale.z * -1);
+                    scene.add(dustyPath2);
+                })
+            );
+
+            //Load truck billboard
+            renderer._microCache.getSet('billboard_post_apo',
+                gltfLoader.load("examples/models/gltf/billboard_post_apo/scene.gltf", function (gltf) {
+                    billBoard = gltf.scene;
+                    billBoard.scale.set(0.8, 0.8, 0.8);
+                    billBoard.rotation.y = 1.53588974175501;
+                    billBoard.position.set(-1500, 167, -1324);
+                    scene.add(billBoard);
+                })
+            );
+
+
+            //Load motel sign
+            renderer._microCache.getSet('motelsign_post_apo_gltf',
+                gltfLoader.load("examples/models/gltf/motelsign_post_apo/scene.gltf", function (gltf) {
+                    motelSign = gltf.scene;
+                    motelSign.scale.set(0.2, 0.2, 0.2);
+                    motelSign.rotation.y = 0.837758040957278;
+                    motelSign.position.set(-2307 + 195, 140, 400 - 260);
+                    scene.add(motelSign);
+                })
+            )
+
+            //Load abndoned building 
+            renderer._microCache.getSet('abandon_building_gltf',
+                gltfLoader.load("examples/models/gltf/abandon_building/scene.gltf", function (gltf) {
+                    abndBuilding = gltf.scene;
+                    abndBuilding.scale.set(0.2, 0.2, 0.2);
+                    abndBuilding.rotation.y = 3.15904594610974;
+                    abndBuilding.position.set(-2430 + 195, 151, 0 - 260);
+                    scene.add(abndBuilding);
+                })
+            )
+
+            //Load lighhouse 
+            renderer._microCache.getSet('lighthousegltf',
+                gltfLoader.load("examples/models/gltf/grebeni/scene.gltf", function (gltf) {
+                    lighthouse = gltf.scene;
+                    lighthouse.scale.set(1600, 1600, 1600);
+                    lighthouse.rotation.y = 1.0471975511966;
+                    lighthouse.position.set(3903, 666, -521);
+                    scene.add(lighthouse);
+                })
+            );
+
+            //TESTING CLIPPING
+            dinerpzPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), -386);
+            dinernxPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 3418);
+            dinernzPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 2121);
+
+            roadnxPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), -1218);
+
+            //Load diner
+            renderer._microCache.getSet('dinergltf',
+                gltfLoader.load("examples/models/gltf/restro/scene.gltf", function (gltf) {
+                    diner = gltf.scene;
+                    diner.scale.set(0.9, 0.9, 0.9);
+                    diner.rotation.y = 1.56;
+                    diner.position.set(-2250, 151, -95);
+                    diner.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            child.material.clippingPlanes = [dinerpzPlane, dinernxPlane, dinernzPlane],
+                                child.material.opacity = 1;
+                            child.material.side = THREE.DoubleSide
+
+                        }
+
+                    });
+                    scene.add(diner);
+
+                })
+            );
+
+            //Load gas station
+            renderer._microCache.getSet('gas_station_gltf',
+                gltfLoader.load("examples/models/gltf/gas_station_ussr/scene.gltf", function (gltf) {
+                    gasStation = gltf.scene;
+                    gasStation.scale.set(7, 7, 7);
+                    gasStation.rotation.y = 3.15904594610974;
+                    gasStation.position.set(-2184, 268, -3044);
+                    scene.add(gasStation);
+
+                })
+            );
+
+            // new THREE.Plane( new THREE.Vector3( 1, 0, 0  ), 3570 )
+
+            //Load walls to surround diner/abandoned building/gas station
+            renderer._microCache.getSet('mossy_stone_wall_gltf',
+                gltfLoader.load("examples/models/gltf/mossy_stone_wall/scene.gltf", function (gltf) {
+                    dinerWall = gltf.scene;
+                    dinerWall.scale.set(1.7, 1.7, 1.7);
+                    dinerWall.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [pzPlane, specialpzPlane, pxPlane, nzPlane],
                                 child.material.clipShadows = true,
                                 child.material.side = THREE.DoubleSide
 
-                            }
-                        
+                        }
+
+
+                    });
+                    dinerWall.position.set(-2189, -3, 520);
+                    dinerWall2 = dinerWall.clone();
+                    dinerWall2.rotation.y = Math.PI / 2;
+                    dinerWall2.position.set(-2460, -3, 28);
+
+                    dinerWall4 = dinerWall.clone();
+                    dinerWall4.rotation.y = Math.PI / 2;
+                    dinerWall4.position.set(-3420, -3, -900 + 140)
+
+                    dinerWall5 = dinerWall4.clone();
+                    dinerWall5.position.z = -1210;
+                    dinerWall5.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [dinernzPlane, pzPlane, specialpzPlane, pxPlane, nzPlane],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+
+                        }
+
+                    });
+                    scene.add(dinerWall);
+                    scene.add(dinerWall2);
+                    scene.add(dinerWall4);
+                    scene.add(dinerWall5);
+
+                })
+            );
+
+            renderer._microCache.getSet('mossy_stone_wall_gltf',
+                gltfLoader.load("examples/models/gltf/mossy_stone_wall/scene.gltf", function (gltf) {
+                    dinerWall3 = gltf.scene;
+                    dinerWall3.scale.set(1.7, 1.7, 1.7);
+                    dinerWall3.position.set(-3460, -3, -250);
+                    dinerWall3.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [new THREE.Plane(new THREE.Vector3(1, 0, 0), 3520)],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+
+                        }
+
+                    });
+                    scene.add(dinerWall3)
+                }, undefined, function (error) {
+
+                    console.error(error);
+                })
+            );
+
+            //Load walls to surround diner/abandoned building/gas station
+            renderer._microCache.getSet('mossy_stone_wall_gltf',
+                gltfLoader.load("examples/models/gltf/mossy_stone_wall/scene.gltf", function (gltf) {
+                    dinerWall6 = gltf.scene;
+                    dinerWall6.scale.set(1.7, 1.7, 1.7);
+                    dinerWall6.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [pzPlane, specialpzPlane, nxPlane, nzPlane, pxPlane, new THREE.Plane(new THREE.Vector3(0, 0, -1), -2360)],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+
+                        }
+
                         dinerWall6.position.set(-3400, -3, -2360)
                         dinerWall6extend = dinerWall6.clone()
                         dinerWall6extend.position.x -= 660;
                         dinerWall6extend2 = dinerWall6extend.clone()
                         dinerWall6extend2.position.x -= 660;
 
-                        dinerWall6extend3 = dinerWall6extend.clone()
-                        dinerWall6extend3.position.z += 367;
-                        dinerWall6extend4 = dinerWall6extend2.clone()
-                        dinerWall6extend4.position.z += 367;
-                        
-                        
-
                         dinerWall7 = dinerWall6.clone();
-                        dinerWall7.rotation.y = Math.PI/2;
+                        dinerWall7.rotation.y = Math.PI / 2;
                         dinerWall7.position.set(-2530, -3, -2600)
 
                         dinerWall8 = dinerWall6.clone();
@@ -773,298 +804,336 @@
                     scene.add(dinerWall6);
                     scene.add(dinerWall6extend);
                     scene.add(dinerWall6extend2);
-                    scene.add(dinerWall6extend3);
-                    scene.add(dinerWall6extend4);
                     scene.add(dinerWall7);
                     scene.add(dinerWall8);
-                });
-
-                //Load coast 
-                gltfLoader.load( "examples/models/gltf/coast/scene.gltf", function ( gltf ) {
-                coast = gltf.scene;
-                coast.scale.set( 10, 10, 10 );
-                coast.position.set (0, -200, -3350);
-                coast.rotation.set(Math.PI + 0.02, Math.PI/2 - 0.5, Math.PI);
-                scene.add( coast );
-
-                const coastClip = new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 80 );
-                coast.traverse( function ( child ) {
-                if ( child.isMesh ) {
-
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    
-                    child.material.clippingPlanes = [ coastClip, nzPlane ],
-                    child.material.clipShadows = true,
-                    child.material.side = THREE.DoubleSide
-
-                }
-
-                });
-                var coast2 = coast.clone();
-                coast2.position.set(132, coast.position.y - 30, coast.position.z + 2550 );
-                coast2.scale.set (coast2.scale.x * -1, coast2.scale.y * 1, coast2.scale.z*1);
-                coast2.rotation.set(0, 1.17, 0);
-                scene.add(coast2);
-
-                }, undefined, function ( error ) {
-
-                console.error( error );
-                } );
-
-                //Load wall 
-                gltfLoader.load( "examples/models/gltf/mossy_stone_wall/scene.gltf", function ( gltf ) {
-                wall = gltf.scene;
-                wall.scale.set( 1.7, 1.7, 1.7 );
-                wall.rotation.set(0, Math.PI/2, 0);
-                wall.traverse( function ( child ) {
-                    if ( child.isMesh ) {
-
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        
-                        child.material.clippingPlanes = [ pzPlane, specialpzPlane, pxPlane, nzPlane ],
-                        child.material.clipShadows = true,
-                        child.material.side = THREE.DoubleSide
-
-                    }
-                wall.position.set(-882, -3, 160);
-                });
-
-                let sgrps = [];
-                let crntpos = 5000;
-                for (var i = 0; i < 16*2; i++){
-                    sgrps[i] = wall.clone();
-                    sgrps[i].position.z = crntpos;
-                    if(i % 2 == 1){
-                        crntpos -= 660;
-                        scene.add(sgrps[i]);
-                    }else{	
-                        sgrps[i].position.x -= 367;
-                        if(i > 6*2 && i < 13*2){
-
-                        }else{
-                            scene.add(sgrps[i]);
-                        }
-                    }
-                    
-                    }  
-
-                }, undefined, function ( error ) {
-
-                console.error( error );
-                } );
-
-                // load the driving man model
-                fbxLoader.load( 'examples/models/fbx/Salsa Dancing.fbx', function ( object ) {
-                dancingMan = object;
-                dancingMan.position.set (-1750, 160, -3200);
-                dancingMan.scale.set (0.5, 0.5, 0.5);
-                dancingMan.rotation.set(0, Math.PI/2, 0);
-
-
-                mixer = new THREE.AnimationMixer( dancingMan );
-
-                const action = mixer.clipAction( dancingMan.animations[ 0 ] );
-                action.play();
-
-                shadeMaterial = new THREE.MeshNormalMaterial({
-                    side: THREE.DoubleSide
                 })
-                dancingMan.traverse( function ( child ) {
+            );
 
-                    if ( child.isMesh ) {
+            renderer._microCache.getSet('mossy_stone_wall_gltf',
+                gltfLoader.load("examples/models/gltf/mossy_stone_wall/scene.gltf", function (gltf) {
+                    dinerWall6extend3 = gltf.scene;
+                    dinerWall6extend3.scale.set(1.7, 1.7, 1.7);
+                    dinerWall6extend3.traverse(function (child) {
+                        if (child.isMesh) {
 
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        console.log("I'm in your childe");
-                        child.material.metalness = 0;
-                        child.material.side = THREE.DoubleSide;
-                        child.material.castShadow = true;
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [pzPlane, specialpzPlane, nxPlane, nzPlane, pxPlane],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+
+                        }
+
+                        dinerWall6extend3.position.set(-3400, -3, -2360)
+                        dinerWall6extend3.position.x -= 660;
+                        dinerWall6extend3.position.z += 367;
+                        dinerWall6extend4 = dinerWall6extend3.clone()
+                        dinerWall6extend4.position.x -= 660;
+
+                    });
+                    scene.add(dinerWall6extend3);
+                    scene.add(dinerWall6extend4);
+                })
+            );
+
+
+            //Load coast 
+            renderer._microCache.getSet('coastgltf',
+                gltfLoader.load("examples/models/gltf/coast/scene.gltf", function (gltf) {
+                    coast = gltf.scene;
+                    coast.scale.set(10, 10, 10);
+                    coast.position.set(0, -200, -3350);
+                    coast.rotation.set(Math.PI + 0.02, Math.PI / 2 - 0.5, Math.PI);
+                    scene.add(coast);
+
+                    const coastClip = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 80);
+                    coast.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [coastClip, nzPlane],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+
+                        }
+
+                    });
+                    var coast2 = coast.clone();
+                    coast2.position.set(132, coast.position.y - 30, coast.position.z + 2550);
+                    coast2.scale.set(coast2.scale.x * -1, coast2.scale.y * 1, coast2.scale.z * 1);
+                    coast2.rotation.set(0, 1.17, 0);
+                    scene.add(coast2);
+
+                }, undefined, function (error) {
+
+                    console.error(error);
+                })
+            );
+
+            //Load wall 
+            renderer._microCache.getSet('mossy_stone_wall_gltf',
+                gltfLoader.load("examples/models/gltf/mossy_stone_wall/scene.gltf", function (gltf) {
+                    wall = gltf.scene;
+                    wall.scale.set(1.7, 1.7, 1.7);
+                    wall.rotation.set(0, Math.PI / 2, 0);
+                    wall.traverse(function (child) {
+                        if (child.isMesh) {
+
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            child.material.clippingPlanes = [pzPlane, specialpzPlane, pxPlane, nzPlane],
+                                child.material.clipShadows = true,
+                                child.material.side = THREE.DoubleSide
+
+                        }
+                        wall.position.set(-882, -3, 160);
+                    });
+
+                    let sgrps = [];
+                    let crntpos = 5000;
+                    for (var i = 0; i < 16 * 2; i++) {
+                        sgrps[i] = wall.clone();
+                        sgrps[i].position.z = crntpos;
+                        if (i % 2 == 1) {
+                            crntpos -= 660;
+                            scene.add(sgrps[i]);
+                        } else {
+                            sgrps[i].position.x -= 367;
+                            if (i > 6 * 2 && i < 13 * 2) {
+
+                            } else {
+                                scene.add(sgrps[i]);
+                            }
+                        }
 
                     }
-                } );
-                    
-                    scene.add( dancingMan );
-                } );  
-        
-                //Load Boat
-                gltfLoader.load( 'examples/models/gltf/boat.glb', function ( gltf ) {
-                boat = gltf.scene;
-                boat.position.set(-95, 0, -218);
-                boat.rotation.set(0.226892802759263, 0.767944870877505,0 );
-                scene.add( boat );
 
-                }, undefined, function ( error ) {
+                }, undefined, function (error) {
 
-                console.error( error );
+                    console.error(error);
+                })
+            );
 
-                } ); 
+            // load the driving man model
+            renderer._microCache.getSet('dancing_man_fbx',
+                fbxLoader.load('examples/models/fbx/Salsa Dancing.fbx', function (object) {
+                    dancingMan = object;
+                    dancingMan.position.set(-1750, 160, -3200);
+                    dancingMan.scale.set(0.5, 0.5, 0.5);
+                    dancingMan.rotation.set(0, Math.PI / 2, 0);
 
-                //Load Flamingo
-                gltfLoader.load( "examples/models/gltf/Flamingo.glb", function ( gltf ) {
-                flamingo = gltf.scene;
-                flamingo = gltf.scene.children[ 0 ];
-                flamingo.scale.set( 0.7, 0.7, 0.7 );
 
-                scene.add( flamingo );
-                flamingo.add(sound1);
+                    mixer = new THREE.AnimationMixer(dancingMan);
 
-                mixer1 = new THREE.AnimationMixer( flamingo );
-                mixer1.clipAction( gltf.animations[ 0 ] ).setDuration( 1 ).play();
+                    const action = mixer.clipAction(dancingMan.animations[0]);
+                    action.play();
 
-                } );   
+                    shadeMaterial = new THREE.MeshNormalMaterial({
+                        side: THREE.DoubleSide
+                    })
+                    dancingMan.traverse(function (child) {
 
-                //
+                        if (child.isMesh) {
 
-                controls = new OrbitControls( camera, renderer.domElement );
-                controls.maxPolarAngle = Math.PI * 0.495;
-                controls.target.set( 0, 500, 0 );
-                controls.minDistance = 40.0;
-                controls.maxDistance = 10000.0;
-                controls.update();
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            console.log("I'm in your childe");
+                            child.material.metalness = 0;
+                            child.material.side = THREE.DoubleSide;
+                            child.material.castShadow = true;
 
-                //
+                        }
+                    });
 
-                const axesHelper = new THREE.AxesHelper(1000)
-                axesHelper.position.y = 100;
-                // scene.add(axesHelper)
-                
-                //
+                    scene.add(dancingMan);
+                })
+            );
 
-                stats = new Stats();
-                container.appendChild( stats.dom );
+            //Load Boat
+            renderer._microCache.getSet('boatglb',
+                gltfLoader.load('examples/models/gltf/boat.glb', function (gltf) {
+                    boat = gltf.scene;
+                    boat.position.set(-95, 0, -218);
+                    boat.rotation.set(0.226892802759263, 0.767944870877505, 0);
+                    scene.add(boat);
 
-                // GUI
+                }, undefined, function (error) {
 
-                const gui = new GUI();
+                    console.error(error);
 
-                const folderSky = gui.addFolder( 'Sky' );
-                folderSky.add( parameters, 'elevation', 0, 90, 0.1 ).onChange( updateSun );
-                folderSky.add( parameters, 'azimuth', - 180, 180, 0.1 ).onChange( updateSun );
-                folderSky.add( parameters, "fogBool" ).name( "Fog" ).onChange(toggleFog);
-                folderSky.open();
+                })
+            );
 
-                const folderCar = gui.addFolder( 'Car' );
-                folderCar.add( parameters, 'fog', 0, 100, 0.5).name("Speed")
-                folderCar.open();
-                const waterUniforms = water.material.uniforms;
+            //Load Flamingo
+            renderer._microCache.getSet('flamingoglb',
+                gltfLoader.load("examples/models/gltf/Flamingo.glb", function (gltf) {
+                    flamingo = gltf.scene;
+                    flamingo = gltf.scene.children[0];
+                    flamingo.scale.set(0.7, 0.7, 0.7);
 
-                const folderWater = gui.addFolder( 'Water' );
-                folderWater.add( waterUniforms.distortionScale, 'value', 0, 8, 0.1 ).name( 'distortionScale' );
-                folderWater.add( waterUniforms.size, 'value', 0.1, 10, 0.1 ).name( 'size' );
-                folderWater.open();
+                    scene.add(flamingo);
+                    flamingo.add(sound1);
 
-                //
+                    mixer1 = new THREE.AnimationMixer(flamingo);
+                    mixer1.clipAction(gltf.animations[0]).setDuration(1).play();
 
-                window.addEventListener( 'resize', onWindowResize );
-                
+                })
+            );
+
+            //
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.maxPolarAngle = Math.PI * 0.495;
+            controls.target.set(0, 500, 0);
+            controls.minDistance = 40.0;
+            controls.maxDistance = 10000.0;
+            controls.update();
+
+            //
+
+            const axesHelper = new THREE.AxesHelper(1000)
+            axesHelper.position.y = 100;
+            // scene.add(axesHelper)
+
+            //
+
+            stats = new Stats();
+            container.appendChild(stats.dom);
+
+            // GUI
+
+            const gui = new GUI();
+
+            const folderSky = gui.addFolder('Sky');
+            folderSky.add(parameters, 'elevation', 0, 90, 0.1).onChange(updateSun);
+            folderSky.add(parameters, 'azimuth', - 180, 180, 0.1).onChange(updateSun);
+            folderSky.add(parameters, "fogBool").name("Fog").onChange(toggleFog);
+            folderSky.open();
+
+            const folderCar = gui.addFolder('Car');
+            folderCar.add(parameters, 'fog', 0, 100, 0.5).name("Speed")
+            folderCar.open();
+            const waterUniforms = water.material.uniforms;
+
+            const folderWater = gui.addFolder('Water');
+            folderWater.add(waterUniforms.distortionScale, 'value', 0, 8, 0.1).name('distortionScale');
+            folderWater.add(waterUniforms.size, 'value', 0.1, 10, 0.1).name('size');
+            folderWater.open();
+
+            //
+
+            window.addEventListener('resize', onWindowResize);
+
+        }
+
+        function onTransitionEnd(event) {
+            event.target.remove();
+
+        }
+
+        function onWindowResize() {
+
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // lightHelper.update();
+            coneGrp.lookAt(lightTarget.position.x, lightTarget.position.y, lightTarget.position.z);
+            if ((
+                Math.sqrt(
+                    Math.pow(camera.position.x - coneGrp.position.x, 2)
+                    +
+                    Math.pow(camera.position.y - coneGrp.position.y, 2)
+                    +
+                    Math.pow(camera.position.z - coneGrp.position.z, 2)
+                )
+            ) > 3500) {
+
+                cone.material = coneMatNoClip
             }
+            else {
 
-            function onTransitionEnd( event ) {
-                event.target.remove();
-
+                cone.material = coneMatClip
             }
+            var delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
+            if (mixer1) mixer1.update(delta);
+            if (mixer2) mixer2.update(delta);
+            if (mixer3) mixer3.update(delta);
 
-            function onWindowResize() {
+            [].forEach.call(smokeParticles, sp => {
+                sp.position.z += 1;
+                sp.position.x += 1;
 
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize( window.innerWidth, window.innerHeight );
-
-            }
-
-            function animate() {
-                requestAnimationFrame( animate );
-                // lightHelper.update();
-                coneGrp.lookAt(lightTarget.position.x, lightTarget.position.y, lightTarget.position.z);
-                if ((
-                    Math.sqrt(
-                        Math.pow(camera.position.x - coneGrp.position.x, 2)
-                        +
-                        Math.pow(camera.position.y - coneGrp.position.y, 2)
-                        +
-                        Math.pow(camera.position.z - coneGrp.position.z, 2)		
-                    )
-                ) > 3500){
-
-                    cone.material = coneMatNoClip
+                if (sp.position.x >= 5000) {
+                    sp.position.x = -5000;
                 }
-                else{
 
-                    cone.material = coneMatClip
+                if (sp.position.z >= 5000) {
+                    sp.position.z = -5000;
                 }
-                var delta = clock.getDelta();
-                if ( mixer ) mixer.update( delta  );
-                if ( mixer1 ) mixer1.update( delta );
-                if ( mixer2 ) mixer2.update( delta );
-                if ( mixer3 ) mixer3.update( delta );
+                sp.lookAt(camera.position.x, camera.position.y, camera.position.z);
 
-                [].forEach.call(smokeParticles, sp => {
-                    sp.position.z += 1;
-                    sp.position.x += 1;
-                    
-                    if (sp.position.x >= 5000){
-                        sp.position.x = -5000;
-                    }
-                    
-                    if (sp.position.z >= 5000){
-                        sp.position.z = -5000;
-                    }
-                    sp.lookAt(camera.position.x, camera.position.y, camera.position.z);
-        
-                });
+            });
 
 
-                render(parameters);
-                stats.update();
+            render(parameters);
+            stats.update();
+        }
+
+        function onClickaaaa() {
+
+            if (clickFlag == 0) {
+                clickFlag = 1;
+                console.log("click!");
+                sound.context.resume();
+                sound1.context.resume();
             }
 
-            function onClickaaaa(){
-                
-                if (clickFlag == 0){
-                    clickFlag = 1;				
-                    console.log("click!");			
-                    sound.context.resume();
-                    sound1.context.resume();
-                }
-                
+        }
+
+        function render(parameters) {
+            const time = performance.now() * 0.001;
+
+            if (time > 5 && timeFlag == 0) {
+                sound.play();
+                sound1.play();
+                timeFlag++;
+            }
+            animCar.position.z += parameters.fog;
+            if (animCar.position.z > 7000) {
+                animCar.position.z = -5000;
             }
 
-            function render(parameters) {
-                const time = performance.now() * 0.001;
+            water.material.uniforms['time'].value += 1.0 / 60.0;
 
-                if ( time > 5 && timeFlag == 0){
-                    sound.play();
-                    sound1.play();
-                    timeFlag++;
-                }
-                animCar.position.z += parameters.fog;
-                if (animCar.position.z > 7000){
-                    animCar.position.z = -5000;
-                }
+            flamingo.rotation.y = time - 4.5;
+            flamingo.position.x = Math.sin(time) * 640;
+            flamingo.position.y = Math.sin(time) * 40 + 888;
+            flamingo.position.z = Math.cos(time) * 465 - 1078;
 
-                water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
 
-                flamingo.rotation.y = time - 4.5;
-                flamingo.position.x = Math.sin(time) * 640;
-                flamingo.position.y = Math.sin( time ) * 40 + 888 ;
-                flamingo.position.z = Math.cos(time) * 465 -1078; 
+            lightTarget.position.x = (3491 + (Math.sin(time * 0.5) * 2000))
+            lightTarget.position.y = 347;
+            lightTarget.position.z = ((-588) + (Math.sin(time * 0.5 + Math.PI / 2) * 2000))
 
-                
-                lightTarget.position.x = (3491 + (Math.sin(time*0.5)*2000))
-                lightTarget.position.y = 347;
-                lightTarget.position.z = ((-588) + (Math.sin(time*0.5+Math.PI/2)*2000))
+            renderer.render(scene, camera);
 
-                renderer.render( scene, camera );
+        }
+    </script>
 
-            }
-        </script>
-
-        <script src="https://unpkg.com/three@0.129.0/build/three.js"></script>
-        <script src="https://unpkg.com/three@0.129.0/examples/js/controls/OrbitControls.js"></script>
-        <script>
-            let simpleNoise = `
+    <script src="https://unpkg.com/three@0.129.0/build/three.js"></script>
+    <script src="https://unpkg.com/three@0.129.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        let simpleNoise = `
             float N (vec2 st) { // https://thebookofshaders.com/10/
                 return fract( sin( dot( st.xy, vec2(12.9898,78.233 ) ) ) *  43758.5453123);
             }
@@ -1086,6 +1155,7 @@
             return mix( b, t, lv.y );
             }
         `;
-        </script>
-    </body>
+    </script>
+</body>
+
 </html>
