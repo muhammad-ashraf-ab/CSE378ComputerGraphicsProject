@@ -83,7 +83,7 @@
 			let container, stats;
 			let camera, scene, renderer;
 			let controls, water, sun, dirLight, light, lightTarget, lightHelper;
-			let geom, mat, cone;
+			let geom, coneMatClip, coneMatNoClip, cone, hahaPlane, coneGeom;
 
 			//define objects
 			let island, island2;
@@ -103,7 +103,7 @@
 			//CLIPPING DEFINE
 			let clipMaterial;
 			let nzPlane, specialpzPlane, pzPlane, nxPlane, pxPlane, nyPlane, pyPlane;
-			let dinerpzPlane, dinernxPlane, dinernzPlane;
+			let dinerpzPlane, dinernxPlane, dinernzPlane, roadnxPlane;
 
 			//SHADING DEFINE
 			let shadeMaterial;
@@ -128,7 +128,7 @@
 					z: 0, 
 					xp: -3400,
 					zp: -2360,
-					yp: -3,
+					yp: 500,
 					pzConstant: -386,
 					nxConstant: 3418,
 					nzConstant: 2121,
@@ -138,38 +138,8 @@
 			//define sound
 			let sound, sound1;
 			let timeFlag = 0;
-			let smokeMaterial, smokeParticles = [];
-
-/* 			textureLoader.crossOrigin = '';
-
-			textureLoader.load(
-				'https://s3-us-west-2.amazonaws.com/s.cdpn.io/82015/blue-smoke.png',
-				function onLoad(texture) {
-					const smokeGeo = new THREE.PlaneBufferGeometry(300, 300);
-
-					smokeMaterial = new THREE.MeshLambertMaterial({
-						map: texture,
-						transparent: true
-					});
-
-					for (let p = 0, l = 100; p < l; p++) {
-						let particle = new THREE.Mesh(smokeGeo, smokeMaterial);
-
-						particle.position.set(
-							Math.random() * 500 - 250,
-							Math.random() * 500 + 4000,
-							Math.random() * 1000 - 100
-						);
-
-						particle.rotation.z = Math.random() * 360;
-						particle.rotation.x = Math
-						scene.add(particle);
-						smokeParticles.push(particle);
-					}
-				}
-       	 	);
-
- */
+			let smokeMaterial, particle, testPlane, smokeParticles = [];
+		
 
 			init();
 			animate();
@@ -194,6 +164,14 @@
 				loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
 	
 				} );
+
+				// intiate loaders
+				const gltfLoader = new GLTFLoader(loadingManager);
+				const fbxLoader = new FBXLoader(loadingManager);
+				const dracoLoader = new DRACOLoader(loadingManager);
+				const textureLoader = new THREE.TextureLoader(loadingManager);
+				dracoLoader.setDecoderPath( 'js/libs/draco/gltf/' );
+				textureLoader.crossOrigin = '';
 				
 				container = document.getElementById( 'container' );
 
@@ -223,6 +201,14 @@
 
 				sun = new THREE.Vector3();
 
+
+				//TESTING CLIPPING
+				nzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), 5000 );
+				pzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, -1 ), 5000 );
+				specialpzPlane = new THREE.Plane( new THREE.Vector3(0, 0, -1), 5000+15);
+				nxPlane = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 5000 );
+				pxPlane = new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 5000 );
+
 				// Water
 
 				const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
@@ -249,18 +235,59 @@
 
 				scene.add( water );
 
+				textureLoader.load(
+				"textures/whiteCloud.png",
+				function onLoad(texture) {
+					const smokeGeo = new THREE.PlaneBufferGeometry(300, 300);
 
+					smokeMaterial = new THREE.MeshLambertMaterial({
+						clippingPlanes: [nzPlane, pzPlane, nxPlane, pxPlane],
+						map: texture,
+						transparent: true
+					});
+
+					for(var oxpos = -5000; oxpos< 5000; oxpos+= (1000)){
+						for(var ozpos = -5000; ozpos < 5000; ozpos += (1000)){
+							let nxpos = oxpos + 800 *Math.random();
+							let nzpos = ozpos + 800 *Math.random();
+							for (let p = 0, l = 20; p < l; p++) {
+								particle = new THREE.Mesh(smokeGeo, smokeMaterial);
+								
+								particle.rotation.z = Math.random() * 360;
+
+								const testGeo = new THREE.PlaneBufferGeometry(1, 1);
+								const testMat = new THREE.MeshLambertMaterial({
+									opacity: 0,
+									transparent: true
+								});
+								testPlane = new THREE.Mesh (testGeo, testMat);
+								testPlane.add(particle);
+								
+								testPlane.position.set(
+									Math.random() * 400 + nxpos,
+									Math.random() * 600 + 3500,
+									Math.random() * 1000 + nzpos
+					
+								);
+
+								scene.add(testPlane);
+								smokeParticles.push(testPlane);
+							}
+						}
+					}
+				});
+					//////////////////////////////////////////////////////////////////////
 
 				//MY TRY AT NOISE CLOUDS
 
-				const cloudGeo = new THREE.SphereGeometry(400, 250, 250);
+				// const cloudGeo = new THREE.SphereGeometry(400, 250, 250);
 				
-				const cloudMaterial = new THREE.MeshPhongMaterial({
-					transparent: true,
-					opacity: 0.85,
-					color: 0x999999,
-				});
-				let cloud = new THREE.Mesh(cloudGeo,cloudMaterial);
+				// const cloudMaterial = new THREE.MeshPhongMaterial({
+				// 	transparent: true,
+				// 	opacity: 0.85,
+				// 	color: 0x999999,
+				// });
+				// let cloud = new THREE.Mesh(cloudGeo,cloudMaterial);
 
 				// let g = new THREE.SphereGeometry(100, 500, 400);
 
@@ -317,29 +344,29 @@
 				// });
 				
 				// let o = new THREE.Mesh(g, m);
-			 	let xpos = -4000;
-				let zpos = -4000;
-				let ypos = 4000;
-				for(var oxpos = -4000; oxpos< 4000; oxpos+= (2200 + 600*Math.random())){
-					for(var ozpos = -4000; ozpos < 4000; ozpos += (2700 + 600*Math.random())){
-						for (var i = 0; i < 6; i++){
+			 	// let xpos = -4000;
+				// let zpos = -4000;
+				// let ypos = 4000;
+				// for(var oxpos = -4000; oxpos< 4000; oxpos+= (2200 + 600*Math.random())){
+				// 	for(var ozpos = -4000; ozpos < 4000; ozpos += (2700 + 600*Math.random())){
+				// 		for (var i = 0; i < 6; i++){
 							// sgrps[i] = cloud.clone();
 							// sgrps[i].position.x = xpos;
 							// sgrps[i].position.z = zpos;
 							// sgrps[i].position.y = ypos;
 							// cloudGroup.add(sgrps[i]);
-							console.log("hi");
+							// console.log("hi");
 
-							ypos = 3800 + (400*Math.random());
-							for (var j = 0; j < 8; j++){
-								let tempCloud = cloud.clone();
-								tempCloud.position.x = xpos;
-								tempCloud.position.z = zpos;
-								tempCloud.position.y = ypos;
-								if(Math.random() > 0.45)
-									cloudGroup.add(tempCloud);
+							// ypos = 3800 + (400*Math.random());
+							// for (var j = 0; j < 8; j++){
+							// 	let tempCloud = cloud.clone();
+							// 	tempCloud.position.x = xpos;
+							// 	tempCloud.position.z = zpos;
+							// 	tempCloud.position.y = ypos;
+							// 	if(Math.random() > 0.45)
+							// 		cloudGroup.add(tempCloud);
 								
-								console.log("hii");
+							// 	console.log("hii");
 
 								// for(var k = 0; k < 2; k++){
 									
@@ -354,15 +381,15 @@
 									
 								// }
 								
-								zpos+= 300;
-							} 
-							zpos = ozpos;
-							xpos += 300 ;
-						}
-						xpos = oxpos; 
-					}
-				}
-				scene.add(cloudGroup);
+				// 				zpos+= 300;
+				// 			} 
+				// 			zpos = ozpos;
+				// 			xpos += 300 ;
+				// 		}
+				// 		xpos = oxpos; 
+				// 	}
+				// }
+				// scene.add(cloudGroup);
 
 
 				// scene.add(o);
@@ -395,31 +422,40 @@
 				light.target = lightTarget
 				scene.add(light);
 
-				lightHelper = new THREE.SpotLightHelper( light, 0xffffff );
-				scene.add( lightHelper );
+				// lightHelper = new THREE.SpotLightHelper( light, 0xffffff );
+				// scene.add( lightHelper );
 
 				//PAIN
 
-				geom = new THREE.ConeGeometry( 5, 40, 32 );
-				
-				mat = new THREE.MeshBasicMaterial( {color: 0xffff00, opacity: 0.5, visible: true} );
-				cone = new THREE.Mesh( geom, mat );
-				
+				coneGeom = new THREE.ConeGeometry( 65, 40*14, 32,  );
+				geom = new THREE.PlaneGeometry( 40, 40 );
+				coneMatNoClip = new THREE.MeshBasicMaterial( {color: 0xffff00,clippingPlanes: [pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide,fog: true, transparent: true} );
+				coneMatClip = new THREE.MeshBasicMaterial( {color: 0xffff00,clippingPlanes: [ pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide,fog: false, transparent: true} );
+				cone = new THREE.Mesh( coneGeom, coneMatNoClip );
+				hahaPlane = new THREE.Mesh( geom, coneMatNoClip);
+				hahaPlane.rotation.z = -Math.PI/2
 				cone.rotation.z = -Math.PI/2;
+				cone.rotation.y = Math.PI/2;
+				hahaPlane.position.x -= 400;
 				// cone.rotation.y = Math.PI/2;
 				// cone.position.y = 500;
 				cone.scale.set (20, 20, 20);
-				cone.position.x -= 400;
+				hahaPlane.scale.set(20, 20, 20);
+
+				// cone.position.x -= 400;
+				cone.position.z += 400*14;
 				// cone.position.x += 20*20;
 			
 				//cone.rotation.z = 4.60766922526503;
 				//cone.rotation.z = Math.PI/2;
 				// focus on the tip
 				coneGrp.add(cone);
+				// coneGrp.add(hahaPlane)
 				// coneGrp.rotation.y = Math.PI/2;
 				coneGrp.position.set (3491, 347, -588);
-				coneGrp.rotation.y = 6.03;
-				coneGrp.rotation.z = 0.05;
+				// coneGrp.position.y = 500;
+				// coneGrp.rotation.y = 6.03;
+				// coneGrp.rotation.z = 0.05;
 				// coneGrp.position.set (3893, 348, -193);
 				// coneGrp.position.set (0, 500, 0);
 				scene.add(coneGrp)
@@ -448,19 +484,23 @@
 				dirLight.shadow.bias = - 0.0001;
 
 				const dirLightHelper = new THREE.DirectionalLightHelper( dirLight, 10 );
-				scene.add( dirLightHelper );
+				// scene.add( dirLightHelper );
 
 				// add ambient light to scene
 				let ambLighting = new THREE.AmbientLight(0xFFFFFF, 0.5 );
 				scene.add(ambLighting); 
 
 				const pmremGenerator = new THREE.PMREMGenerator( renderer );
-				
+				// ADD OR REMOVE CLOUDS
 				function removeClouds(){
-					scene.remove(cloudGroup)
+					[].forEach.call(smokeParticles, sp => {
+						scene.remove(sp)
+					});
 				}
 				function enableClouds(){
-					scene.add(cloudGroup)
+					[].forEach.call(smokeParticles, sp => {
+						scene.add(sp)
+					});
 				}
 
 				function updateSun() {
@@ -493,14 +533,7 @@
 				}
 
 				updateSun();
-				
-				// intiate loaders
-				const gltfLoader = new GLTFLoader(loadingManager);
-				const fbxLoader = new FBXLoader(loadingManager);
-				const dracoLoader = new DRACOLoader(loadingManager);
-				const textureLoader = new THREE.TextureLoader(loadingManager);
-				dracoLoader.setDecoderPath( 'js/libs/draco/gltf/' );
-				textureLoader.crossOrigin = '';
+			
 
 				//
 				const audioLoader = new THREE.AudioLoader();
@@ -528,12 +561,7 @@
 
 				});
 				
-				//TESTING CLIPPING
-				nzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), 5000 );
-				pzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, -1 ), 5000 );
-				specialpzPlane = new THREE.Plane( new THREE.Vector3(0, 0, -1), 5000+15);
-				nxPlane = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 5000 );
-				pxPlane = new THREE.Plane( new THREE.Vector3( -1, 0, 0 ), 5000 );
+				
 
 				clipMaterial = new THREE.MeshNormalMaterial({
 					clippingPlanes: [pzPlane, nzPlane, pxPlane, nzPlane],
@@ -597,7 +625,7 @@
 
 					child.castShadow = true;
 					child.receiveShadow = true;		
-					child.material.clippingPlanes = [ pzPlane, specialpzPlane, nxPlane, nzPlane ],
+					child.material.clippingPlanes = [ roadnxPlane, pzPlane, specialpzPlane, nxPlane, nzPlane ],
 					child.material.clipShadows = true,
 					child.material.side = THREE.DoubleSide
 				}
@@ -738,6 +766,8 @@
 				dinerpzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, -1 ), -386 );
 				dinernxPlane = new THREE.Plane( new THREE.Vector3( 1, 0, 0  ), 3418 );
 				dinernzPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1  ), 2121 );
+				
+				roadnxPlane = new THREE.Plane( new THREE.Vector3( -1, 0, 0  ), -1218 );
 
 				//Load diner
 				gltfLoader.load( "models/gltf/restro/scene.gltf", function ( gltf ) {
@@ -1005,31 +1035,31 @@
 				// });
 				// let cloud = new THREE.Mesh(cloudGeo,cloudMaterial);
 
-				textureLoader.load("textures/smoke-1.png", function(texture){
-					const smokeCloudGeo = new THREE.PlaneBufferGeometry(500,500);
-					const smokeCloudMaterial = new THREE.MeshLambertMaterial({
-						map: texture,
-						transparent: true
-					});
+				// textureLoader.load("textures/smoke-1.png", function(texture){
+				// 	const smokeCloudGeo = new THREE.PlaneBufferGeometry(500,500);
+				// 	const smokeCloudMaterial = new THREE.MeshLambertMaterial({
+				// 		map: texture,
+				// 		transparent: true
+				// 	});
 
-					for (let p = 0; p < 50; ++p) {
+				// 	for (let p = 0; p < 50; ++p) {
 					
-					let smokeCloud = new THREE.Mesh(smokeCloudGeo, cloudMaterial);
-					smokeCloud.position.set(
-						Math.random() * 800 - 400,
-						500,
-						Math.random() * 500 - 500
-					);
-					smokeCloud.rotation.x = 1.16;
-					smokeCloud.rotation.y = -0.12;
-					smokeCloud.rotation.z = Math.random() * 2 * Math.PI;
-					smokeCloud.material.opacity = 0.55;
-					cloudParticles.push(smokeCloud);
-					scene.add(smokeCloud);
-					}
-				});
+				// 	let smokeCloud = new THREE.Mesh(smokeCloudGeo, cloudMaterial);
+				// 	smokeCloud.position.set(
+				// 		Math.random() * 800 - 400,
+				// 		500,
+				// 		Math.random() * 500 - 500
+				// 	);
+				// 	smokeCloud.rotation.x = 1.16;
+				// 	smokeCloud.rotation.y = -0.12;
+				// 	smokeCloud.rotation.z = Math.random() * 2 * Math.PI;
+				// 	smokeCloud.material.opacity = 0.55;
+				// 	cloudParticles.push(smokeCloud);
+				// 	scene.add(smokeCloud);
+				// 	}
+				// });
 
-				cloud.position.y = 4000;
+			//	cloud.position.y = 4000;
 
 				let sgrps = [];
 				// let xpos = 0;
@@ -1166,7 +1196,7 @@
 
 				const axesHelper = new THREE.AxesHelper(1000)
 				axesHelper.position.y = 100;
-            	scene.add(axesHelper)
+            	// scene.add(axesHelper)
 				
 				//
 
@@ -1226,19 +1256,50 @@
 			}
 
 			function animate() {
-				
 				requestAnimationFrame( animate );
-				lightHelper.update();
-				coneGrp.rotation.y = 6.03;
-				coneGrp.rotation.z = 0.05;
-				coneGrp.lookAt(parameters.xp, parameters.yp, parameters.zp);
+				// lightHelper.update();
+				// coneGrp.rotation.y = 6.03;
+				// coneGrp.rotation.z = 0.05;
+				coneGrp.lookAt(lightTarget.position.x, lightTarget.position.y, lightTarget.position.z);
+				// coneGrp.rotation.y += Math.PI/180;
+				// light.rotation.y += Math.PI/180;
+				if ((
+					Math.sqrt(
+						Math.pow(camera.position.x - coneGrp.position.x, 2)
+						+
+						Math.pow(camera.position.y - coneGrp.position.y, 2)
+						+
+						Math.pow(camera.position.z - coneGrp.position.z, 2)		
+					)
+				) > 3500){
 
+					cone.material = coneMatNoClip
+				}
+				else{
 
+					cone.material = coneMatClip
+				}
 				var delta = clock.getDelta();
 				if ( mixer ) mixer.update( delta  );
 				if ( mixer1 ) mixer1.update( delta );
 				if ( mixer2 ) mixer2.update( delta );
 				if ( mixer3 ) mixer3.update( delta );
+
+				[].forEach.call(smokeParticles, sp => {
+					//sp.rotation.z += delta * 0.2;
+					sp.position.z += 1;
+					sp.position.x += 1;
+					
+					if (sp.position.x >= 5000){
+						sp.position.x = -5000;
+					}
+					
+					if (sp.position.z >= 5000){
+						sp.position.z = -5000;
+					}
+					sp.lookAt(camera.position.x, camera.position.y, camera.position.z);
+		
+				});
 
 				// cloudParticles.forEach(p => {
 				// 	p.rotation.z -=0.001;
@@ -1288,9 +1349,12 @@
  	 			// coneGrp.rotation.x = parameters.x;
 				// coneGrp.rotation.y = parameters.y;
 				// coneGrp.rotation.z = parameters.z;
-				lightTarget.position.x = parameters.xp;
-				lightTarget.position.z = parameters.zp;  
-				lightTarget.position.y = parameters.yp; 
+				// coneGrp.position.set (3491, 347, -588);
+				// -588 + 2000 = 
+				// lightTarget.position.x = parameters.xp;
+
+				// lightTarget.position.z = parameters.zp;  
+				// lightTarget.position.y = parameters.yp; 
 
 				// coneGrp.position.x = parameters.xp;
 				// coneGrp.position.z = parameters.zp;  
@@ -1323,6 +1387,11 @@
 				flamingo.position.x = Math.sin(time) * 640;
 				flamingo.position.y = Math.sin( time ) * 40 + 888 ;
 				flamingo.position.z = Math.cos(time) * 465 -1078; 
+
+				
+				lightTarget.position.x = (3491 + (Math.sin(time*0.5)*2000))
+				lightTarget.position.y = 347;
+				lightTarget.position.z = ((-588) + (Math.sin(time*0.5+Math.PI/2)*2000))
 
 				renderer.render( scene, camera );
 
