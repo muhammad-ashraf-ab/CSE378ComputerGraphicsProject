@@ -370,6 +370,16 @@
                 });
             }
 
+            function removeCone(){
+                scene.remove(coneGrp);
+                scene.remove(light);
+            }
+
+            function enableCone(){
+                scene.add(coneGrp);
+                scene.add(light);
+            }
+
             function updateSun() {
 
                 const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
@@ -377,9 +387,11 @@
                 if (parameters.elevation < 3.5 && sundownFlag == 0) {
                     sundownFlag = 1
                     removeClouds()
+                    enableCone()
                 } else if (parameters.elevation > 3.5 && sundownFlag == 1) {
                     sundownFlag = 0
                     enableClouds()
+                    removeCone()
                 }
 
                 sun.setFromSphericalCoords(1, phi, theta);
