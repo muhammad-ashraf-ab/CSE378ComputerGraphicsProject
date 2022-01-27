@@ -22,7 +22,7 @@
 
         <a href="https://threejs.org" target="_blank" rel="noopener">Team 2 Proj</a> - Skimming by the all seeing eye
     </div>
-    <script>
+    <!-- <script>
         // https://github.com/yiwenl/glsl-fbm/blob/master/3d.glsl
         const fbm = `
             #define NUM_OCTAVES 5
@@ -66,7 +66,7 @@
             return v;
             }
             `;
-    </script>
+    </script> -->
     <script type="module">
         import * as THREE from './build/three.module.js';
         import Stats from './examples/jsm/libs/stats.module.js';
@@ -109,6 +109,13 @@
         //SHADING DEFINE
         let shadeMaterial;
 
+        
+
+        //define sound
+        let sound, sound1;
+        let timeFlag = 0;
+        let smokeMaterial, particle, testPlane, smokeParticles = [];
+
 
         //cloudss
         let cloudGroup = new THREE.Group;
@@ -120,6 +127,7 @@
         let switchF = 0;
         let prevTime = Date.now();
         const clock = new THREE.Clock();
+
 
         const parameters = {
             elevation: 3,
@@ -136,11 +144,6 @@
             fog: 30,
             fogBool: false,
         };
-
-        //define sound
-        let sound, sound1;
-        let timeFlag = 0;
-        let smokeMaterial, particle, testPlane, smokeParticles = [];
 
 
         init();
@@ -247,6 +250,7 @@
                         smokeMaterial = new THREE.MeshLambertMaterial({
                             clippingPlanes: [nzPlane, pzPlane, nxPlane, pxPlane],
                             map: texture,
+                            opacity: 0.69,
                             transparent: true
                         });
 
@@ -270,7 +274,7 @@
                                     testPlane.position.set(
                                         Math.random() * 400 + nxpos,
                                         Math.random() * 600 + 3500,
-                                        Math.random() * 1000 + nzpos
+                                        Math.random() * 400 + nzpos
 
                                     );
 
@@ -305,7 +309,7 @@
             light.target = lightTarget
             scene.add(light);
 
-            coneGeom = new THREE.ConeGeometry(65, 40 * 14, 32,);
+            coneGeom = new THREE.ConeGeometry(65, 40 * 14, 32);
             geom = new THREE.PlaneGeometry(40, 40);
             coneMatNoClip = new THREE.MeshBasicMaterial({ color: 0xffff00, clippingPlanes: [pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide, fog: true, transparent: true });
             coneMatClip = new THREE.MeshBasicMaterial({ color: 0xffff00, clippingPlanes: [pzPlane, nzPlane, pxPlane, nxPlane], opacity: 0.5, visible: true, side: THREE.DoubleSide, fog: false, transparent: true });
@@ -321,7 +325,6 @@
 
             coneGrp.add(cone);
             coneGrp.position.set(3491, 347, -588);
-            scene.add(coneGrp)
 
             // add directional light to scene
             dirLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -493,7 +496,6 @@
                     })
             );
 
-
             // add horizontal road
             renderer._microCache.getSet('roadgltf',
                 gltfLoader.load('examples/models/gltf/road/scene.gltf',
@@ -603,6 +605,8 @@
             renderer._microCache.getSet('dusty_path_in_the_fields_gltf',
                 gltfLoader.load("examples/models/gltf/dusty_path_in_the_fields/scene.gltf", function (gltf) {
                     dustyPath = gltf.scene;
+
+                    dustyPath.receiveShadow = true;
                     dustyPath.scale.set(0.5, 0.5, 0.5);
                     dustyPath.position.set(-1938 + 135, 180, -341 - 260);
                     scene.add(dustyPath);
@@ -927,7 +931,7 @@
                 })
             );
 
-            // load the driving man model
+            // load the dancing man model
             renderer._microCache.getSet('dancing_man_fbx',
                 fbxLoader.load('examples/models/fbx/Salsa Dancing.fbx', function (object) {
                     dancingMan = object;
@@ -1054,7 +1058,7 @@
         function animate() {
             requestAnimationFrame(animate);
             // lightHelper.update();
-            coneGrp.lookAt(lightTarget.position.x, lightTarget.position.y, lightTarget.position.z);
+            coneGrp.lookAt(lightTarget.position);
             if ((
                 Math.sqrt(
                     Math.pow(camera.position.x - coneGrp.position.x, 2)
